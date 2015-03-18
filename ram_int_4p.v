@@ -9,14 +9,14 @@
 
 `timescale 1 ps / 1 ps
 
-module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
+module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                   MEM_DEPTH = 1 << ADDR_WIDTH, BE = 4'h7)
   (
 //    input [ADDR_WIDTH - 1:0] wr_addr0, rd_addr0, wr_addr1, rd_addr1,
 //                              wr_addr2, rd_addr2, wr_addr3, rd_addr3,
 //    input [DATA_WIDTH - 1:0] wr_data0, wr_data1, wr_data2, wr_data3,
-    input CLOCK_50_B5B,// wr_en0, wr_en1, wr_en2, wr_en3, rd_en0, rd_en1, rd_en2,
-          //rd_en3, reset,
+    input CLOCK_50_B5B, CLOCK_50_B6A,// wr_en0, wr_en1, wr_en2, wr_en3, rd_en0,
+//          rd_en1, rd_en2, rd_en3, reset,
 //    output reg rd_data_valid,
 //    output reg [DATA_WIDTH - 1:0] rd_data0, rd_data1, rd_data2, rd_data3,
 		output wire [9:0]  mem_ca,                   //       memory.mem_ca
@@ -70,7 +70,7 @@ module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 	reg   [28:0] avl_addr_3;
 	reg          avl_read_req_3;
 	wire   [3:0] avl_be_3;
-	wire         avl_rdata_valid_3
+	wire         avl_rdata_valid_3;
 	reg          avl_write_req_3;
 	reg    [2:0] avl_size_3;
   
@@ -90,7 +90,8 @@ module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   
   wire local_cal_fail, local_cal_success, local_init_done;
   reg global_reset_n, soft_reset_n;
-  reg [28:0] prev_wr_addr, prev_rd_addr;
+  reg [28:0] prev_wr_addr0, prev_rd_addr0, prev_wr_addr1, prev_rd_addr1,
+              prev_wr_addr2, prev_rd_addr2, prev_wr_addr3, prev_rd_addr3;
   
   /* Declare source signals */
   reg [ADDR_WIDTH - 1:0] wr_addr0, rd_addr0, wr_addr1, rd_addr1, wr_addr2,
@@ -107,14 +108,14 @@ module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   /* Instantiate In-System Sources and Probes */
   ISSP ISSP_inst(
     .source_clk(pll0_pll_clk_clk),
-    .source({wr_addr, rd_addr, wr_data, wr_en, rd_en, reset}),
-    .probe({prev_wr_addr, local_cal_fail_reg, local_cal_success_reg, local_init_done_reg,
-      rd_data_valid, rd_data, curr_state, next_state})
+    .source({wr_addr0, rd_addr0, wr_data0, wr_en0, rd_en0, reset}),
+    .probe({prev_wr_addr0, local_cal_fail_reg, local_cal_success_reg, local_init_done_reg,
+      rd_data_valid, rd_data0, curr_state, next_state})
   );
   
   /* Instantiate extra PLL */
   PLL pll_inst(
-    .refclk(CLOCK_50_B5B),
+    .refclk(CLOCK_50_B6A),
     .rst(1'b0),
 		.outclk_0(pll0_pll_clk_clk),
 		.locked(pll_locked_int)
@@ -155,8 +156,8 @@ module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
       avl_read_req_3 <= `DEASSERT_H;
       avl_write_req_3 <= `DEASSERT_H;
       
-      prev_rd_addr <= {ADDR_WIDTH{1'h0}};
-      prev_wr_addr <= {ADDR_WIDTH{1'h0}};
+      prev_rd_addr0 <= {ADDR_WIDTH{1'h0}};
+      prev_wr_addr0 <= {ADDR_WIDTH{1'h0}};
     end else
       curr_state <= next_state;
       
@@ -181,32 +182,32 @@ module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
       IDLE:   begin
                 avl_write_req_0 <= `DEASSERT_H;
                 avl_read_req_0 <= `DEASSERT_H;
-                if (avl_ready_0 == `ASSERT_H && wr_en == `ASSERT_L
-                      && prev_wr_addr != wr_addr && rd_en == `DEASSERT_L)
+                if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
+                      && prev_wr_addr0 != wr_addr0 && rd_en0 == `DEASSERT_L)
                   next_state <= WRITE;
-                else if (avl_ready_0 == `ASSERT_H && rd_en == `ASSERT_L 
-                          && prev_rd_addr != rd_addr && wr_en == `DEASSERT_L)
+                else if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L 
+                          && prev_rd_addr0 != rd_addr0 && wr_en0 == `DEASSERT_L)
                   next_state <= READ;
                 else
                   next_state <= IDLE;
               end
       
       WRITE:  begin
-                if (avl_ready_0 == `ASSERT_H && wr_en == `ASSERT_L
-                       && rd_en == `DEASSERT_L) begin
+                if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
+                       && rd_en0 == `DEASSERT_L) begin
                   avl_write_req_0 <= `ASSERT_H;
-                  avl_addr_0 <= wr_addr;
-                  prev_wr_addr <= avl_addr_0;
+                  avl_addr_0 <= wr_addr0;
+                  prev_wr_addr0 <= avl_addr_0;
                 end
                 next_state <= IDLE;
               end
       
       READ:   begin
-                if (avl_ready_0 == `ASSERT_H && rd_en == `ASSERT_L
-                       && wr_en == `DEASSERT_L) begin
+                if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L
+                       && wr_en0 == `DEASSERT_L) begin
                   avl_read_req_0 <= `ASSERT_H;
-                  avl_addr_0 <= rd_addr;
-                  prev_rd_addr <= avl_addr_0;
+                  avl_addr_0 <= rd_addr0;
+                  prev_rd_addr0 <= avl_addr_0;
                 end
                   next_state <= IDLE;
               end
@@ -237,8 +238,8 @@ module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 		.avl_burstbegin_0           (avl_burstbegin_0),                               //                   .beginbursttransfer
 		.avl_addr_0                 (avl_addr_0),                                     //                   .address
 		.avl_rdata_valid_0          (avl_rdata_valid_0),                              //                   .readdatavalid
-		.avl_rdata_0                (rd_data),                                        //                   .readdata
-		.avl_wdata_0                (wr_data),                                        //                   .writedata
+		.avl_rdata_0                (rd_data0),                                        //                   .readdata
+		.avl_wdata_0                (wr_data0),                                        //                   .writedata
 		.avl_be_0                   (avl_be_0),                                       //                   .byteenable
 		.avl_read_req_0             (avl_read_req_0),                                 //                   .read
 		.avl_write_req_0            (avl_write_req_0),                                //                   .write
@@ -273,29 +274,29 @@ module ram_int #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 		.avl_read_req_3             (),                                               //                   .read
 		.avl_write_req_3            (),                                               //                   .write
 		.avl_size_3                 (),                                               //                   .burstcount
-		.mp_cmd_clk_0_clk           (seq_debug_clk_clk),                              //       mp_cmd_clk_0.clk
+		.mp_cmd_clk_0_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_0.clk
 		.mp_cmd_reset_n_0_reset_n   (~rst_controller_reset_out_reset),                //   mp_cmd_reset_n_0.reset_n
-		.mp_cmd_clk_1_clk           (seq_debug_clk_clk),                              //       mp_cmd_clk_1.clk
+		.mp_cmd_clk_1_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_1.clk
 		.mp_cmd_reset_n_1_reset_n   (~rst_controller_001_reset_out_reset),            //   mp_cmd_reset_n_1.reset_n
-		.mp_cmd_clk_2_clk           (seq_debug_clk_clk),                              //       mp_cmd_clk_2.clk
+		.mp_cmd_clk_2_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_2.clk
 		.mp_cmd_reset_n_2_reset_n   (~rst_controller_002_reset_out_reset),            //   mp_cmd_reset_n_2.reset_n
-		.mp_cmd_clk_3_clk           (seq_debug_clk_clk),                              //       mp_cmd_clk_3.clk
+		.mp_cmd_clk_3_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_3.clk
 		.mp_cmd_reset_n_3_reset_n   (~rst_controller_003_reset_out_reset),            //   mp_cmd_reset_n_3.reset_n
-		.mp_rfifo_clk_0_clk         (seq_debug_clk_clk),                              //     mp_rfifo_clk_0.clk
+		.mp_rfifo_clk_0_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_0.clk
 		.mp_rfifo_reset_n_0_reset_n (~rst_controller_004_reset_out_reset),            // mp_rfifo_reset_n_0.reset_n
-		.mp_wfifo_clk_0_clk         (seq_debug_clk_clk),                              //     mp_wfifo_clk_0.clk
+		.mp_wfifo_clk_0_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_0.clk
 		.mp_wfifo_reset_n_0_reset_n (~rst_controller_005_reset_out_reset),            // mp_wfifo_reset_n_0.reset_n
-		.mp_rfifo_clk_1_clk         (seq_debug_clk_clk),                              //     mp_rfifo_clk_1.clk
+		.mp_rfifo_clk_1_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_1.clk
 		.mp_rfifo_reset_n_1_reset_n (~rst_controller_006_reset_out_reset),            // mp_rfifo_reset_n_1.reset_n
-		.mp_wfifo_clk_1_clk         (seq_debug_clk_clk),                              //     mp_wfifo_clk_1.clk
+		.mp_wfifo_clk_1_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_1.clk
 		.mp_wfifo_reset_n_1_reset_n (~rst_controller_007_reset_out_reset),            // mp_wfifo_reset_n_1.reset_n
-		.mp_rfifo_clk_2_clk         (seq_debug_clk_clk),                              //     mp_rfifo_clk_2.clk
+		.mp_rfifo_clk_2_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_2.clk
 		.mp_rfifo_reset_n_2_reset_n (~rst_controller_008_reset_out_reset),            // mp_rfifo_reset_n_2.reset_n
-		.mp_wfifo_clk_2_clk         (seq_debug_clk_clk),                              //     mp_wfifo_clk_2.clk
+		.mp_wfifo_clk_2_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_2.clk
 		.mp_wfifo_reset_n_2_reset_n (~rst_controller_009_reset_out_reset),            // mp_wfifo_reset_n_2.reset_n
-		.mp_rfifo_clk_3_clk         (seq_debug_clk_clk),                              //     mp_rfifo_clk_3.clk
+		.mp_rfifo_clk_3_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_3.clk
 		.mp_rfifo_reset_n_3_reset_n (~rst_controller_010_reset_out_reset),            // mp_rfifo_reset_n_3.reset_n
-		.mp_wfifo_clk_3_clk         (seq_debug_clk_clk),                              //     mp_wfifo_clk_3.clk
+		.mp_wfifo_clk_3_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_3.clk
 		.mp_wfifo_reset_n_3_reset_n (~rst_controller_011_reset_out_reset),            // mp_wfifo_reset_n_3.reset_n
 		.local_init_done            (local_init_done),                                //             status.local_init_done
 		.local_cal_success          (local_cal_success),                              //                   .local_cal_success
