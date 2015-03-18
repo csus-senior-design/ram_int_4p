@@ -1,0 +1,57 @@
+NOTE: 	The parameters shown below are the only ones that need to be changed.
+	The rest can be left as is. The .qprs file can be loaded to automatically
+	fill in all of these changes.
+
+Interface Type
+	Enable Hard External Memory Interface
+
+PHY Settings
+	General Settings
+		Speed Grade: 7
+	Clocks
+		Memory clock frequency: 330.0MHz
+		PLL reference clock frequency: 50.0MHz
+		Rate on Avalon-MM interface: Full
+
+Memory Parameters
+	Memory device speed grade: 333.333MHz
+	Total interface width: 32
+	Row address width: 14
+	Column address width: 10
+
+Memory Timing
+	tIS (base): 290ps
+	tIH (base): 290ps
+	tDS (base): 270ps
+	tDH (base): 270ps
+	tDQSQ: 240ps
+	tQHS: 280ps
+	tDQSCK (max): 5500ps
+	tDQSS: 1.0 cycles
+	tDQSH: 0.4 cycles
+	tINIT: 200us
+	tMRW: 2 cycles
+	tRAS: 70.0ns
+	tRCD: 18.0ns
+	tRP: 18.0ns
+	tREFIab: 3.9us
+	tRFCab: 60.0ns
+	tFAW: 50.0ns
+	tRRD: 10.0ns
+
+Board Settings
+	Board Skews
+		Maximum CK delay to DIMM/device: 0.33ns
+		Maximum DQS delay to DIMM/device: 0.34ns
+
+Controller Settings
+	Multiple Port Front End
+		Number of ports: 4
+
+Diagnostics
+	Debugging Options
+		Enable EMIF On-Chip Debug Toolkit
+
+When prompted, add the IP file to the open project.
+Replace your project's .qsf file with the one from the GitHub repository.
+After successfully synthesizing the file, run the <name>_pin_assignments.tcl script.
