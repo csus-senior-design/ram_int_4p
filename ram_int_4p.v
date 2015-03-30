@@ -140,6 +140,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
       avl_size_0 <= 3'h1;
       avl_read_req_0 <= `DEASSERT_H;
       avl_write_req_0 <= `DEASSERT_H;
+      avl_addr_0 <= {ADDR_WIDTH{1'b0}};
       
       avl_burstbegin_1 <= `DEASSERT_H;
       avl_size_1 <= 3'h1;
@@ -160,8 +161,6 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
       prev_wr_addr0 <= {ADDR_WIDTH{1'h0}};
     end else
       curr_state <= next_state;
-      
-    avl_addr_0 <= 29'hZ;
     
     case (curr_state)
       INIT:   begin
