@@ -237,42 +237,42 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 		.avl_burstbegin_0           (avl_burstbegin_0),                               //                   .beginbursttransfer
 		.avl_addr_0                 (avl_addr_0),                                     //                   .address
 		.avl_rdata_valid_0          (avl_rdata_valid_0),                              //                   .readdatavalid
-		.avl_rdata_0                (rd_data0),                                        //                   .readdata
-		.avl_wdata_0                (wr_data0),                                        //                   .writedata
+		.avl_rdata_0                (rd_data0),                                       //                   .readdata
+		.avl_wdata_0                (wr_data0),                                       //                   .writedata
 		.avl_be_0                   (avl_be_0),                                       //                   .byteenable
 		.avl_read_req_0             (avl_read_req_0),                                 //                   .read
 		.avl_write_req_0            (avl_write_req_0),                                //                   .write
 		.avl_size_0                 (avl_size_0),                                     //                   .burstcount
-    .avl_ready_1                (),                                               //              avl_1.waitrequest_n
-		.avl_burstbegin_1           (),                                               //                   .beginbursttransfer
-		.avl_addr_1                 (),                                               //                   .address
-		.avl_rdata_valid_1          (),                                               //                   .readdatavalid
-		.avl_rdata_1                (),                                               //                   .readdata
-		.avl_wdata_1                (),                                               //                   .writedata
-		.avl_be_1                   (),                                               //                   .byteenable
-		.avl_read_req_1             (),                                               //                   .read
-		.avl_write_req_1            (),                                               //                   .write
-		.avl_size_1                 (),                                               //                   .burstcount
-		.avl_ready_2                (),                                               //              avl_2.waitrequest_n
-		.avl_burstbegin_2           (),                                               //                   .beginbursttransfer
-		.avl_addr_2                 (),                                               //                   .address
-		.avl_rdata_valid_2          (),                                               //                   .readdatavalid
-		.avl_rdata_2                (),                                               //                   .readdata
-		.avl_wdata_2                (),                                               //                   .writedata
-		.avl_be_2                   (),                                               //                   .byteenable
-		.avl_read_req_2             (),                                               //                   .read
-		.avl_write_req_2            (),                                               //                   .write
-		.avl_size_2                 (),                                               //                   .burstcount
-		.avl_ready_3                (),                                               //              avl_3.waitrequest_n
-		.avl_burstbegin_3           (),                                               //                   .beginbursttransfer
-		.avl_addr_3                 (),                                               //                   .address
-		.avl_rdata_valid_3          (),                                               //                   .readdatavalid
-		.avl_rdata_3                (),                                               //                   .readdata
-		.avl_wdata_3                (),                                               //                   .writedata
-		.avl_be_3                   (),                                               //                   .byteenable
-		.avl_read_req_3             (),                                               //                   .read
-		.avl_write_req_3            (),                                               //                   .write
-		.avl_size_3                 (),                                               //                   .burstcount
+    .avl_ready_1                (avl_ready_1),                                    //              avl_1.waitrequest_n
+		.avl_burstbegin_1           (avl_burstbegin_1),                               //                   .beginbursttransfer
+		.avl_addr_1                 (avl_addr_1),                                     //                   .address
+		.avl_rdata_valid_1          (avl_rdata_valid_1),                              //                   .readdatavalid
+		.avl_rdata_1                (rd_data1),                                       //                   .readdata
+		.avl_wdata_1                (wr_data1),                                       //                   .writedata
+		.avl_be_1                   (avl_be_1),                                       //                   .byteenable
+		.avl_read_req_1             (avl_read_req_1),                                 //                   .read
+		.avl_write_req_1            (avl_write_req_1),                                //                   .write
+		.avl_size_1                 (avl_size_1),                                     //                   .burstcount
+		.avl_ready_2                (avl_ready_2),                                    //              avl_2.waitrequest_n
+		.avl_burstbegin_2           (avl_burstbegin_2),                               //                   .beginbursttransfer
+		.avl_addr_2                 (avl_addr_2),                                     //                   .address
+		.avl_rdata_valid_2          (avl_rdata_valid_2),                              //                   .readdatavalid
+		.avl_rdata_2                (rd_data2),                                       //                   .readdata
+		.avl_wdata_2                (wr_data2),                                       //                   .writedata
+		.avl_be_2                   (avl_be_2),                                       //                   .byteenable
+		.avl_read_req_2             (avl_read_req_2),                                 //                   .read
+		.avl_write_req_2            (avl_write_req_2),                                //                   .write
+		.avl_size_2                 (avl_size_2),                                     //                   .burstcount
+		.avl_ready_3                (avl_ready_3),                                    //              avl_3.waitrequest_n
+		.avl_burstbegin_3           (avl_burstbegin_3),                               //                   .beginbursttransfer
+		.avl_addr_3                 (avl_addr_3),                                     //                   .address
+		.avl_rdata_valid_3          (avl_rdata_valid_3),                              //                   .readdatavalid
+		.avl_rdata_3                (rd_data3),                                       //                   .readdata
+		.avl_wdata_3                (wr_data3),                                       //                   .writedata
+		.avl_be_3                   (avl_be_3),                                       //                   .byteenable
+		.avl_read_req_3             (avl_read_req_3),                                 //                   .read
+		.avl_write_req_3            (avl_write_req_3),                                //                   .write
+		.avl_size_3                 (avl_size_3),                                     //                   .burstcount
 		.mp_cmd_clk_0_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_0.clk
 		.mp_cmd_reset_n_0_reset_n   (~rst_controller_reset_out_reset),                //   mp_cmd_reset_n_0.reset_n
 		.mp_cmd_clk_1_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_1.clk
