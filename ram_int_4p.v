@@ -214,6 +214,9 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   end
   
   assign avl_be_0 = BE;
+  assign avl_be_1 = BE;
+  assign avl_be_2 = BE;
+  assign avl_be_3 = BE;
   
   /* Begin IP instantiations */
 	LPDDR2x32_4p lpddr2x32_4p_inst (
