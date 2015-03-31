@@ -6,21 +6,21 @@
 #**************************************************************
 # Create Clock
 #**************************************************************
-create_clock -period 8 [get_ports CLOCK_125_p]
+#create_clock -period 8 [get_ports CLOCK_125_p]
 create_clock -period 20 [get_ports CLOCK_50_B5B]
 create_clock -period 20 [get_ports CLOCK_50_B6A]
-create_clock -period 20 [get_ports CLOCK_50_B7A]
-create_clock -period 20 [get_ports CLOCK_50_B8A]
+#create_clock -period 20 [get_ports CLOCK_50_B7A]
+#create_clock -period 20 [get_ports CLOCK_50_B8A]
 
 #**************************************************************
 # Create Generated Clock
 #**************************************************************
 derive_pll_clocks
 
-set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_config_clk}]
-set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_afi_half_clk}]
-set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_avl_clk}]
-set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_afi_clk}]
+#set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_config_clk}]
+#set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_afi_half_clk}]
+#set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_avl_clk}]
+#set_false_path -from [get_clocks CLOCK_50_B6A] -to [get_clocks {lpddr2x32_4p_inst|lpddr2x32_4p_inst|pll0|pll_afi_clk}]
 
 
 #**************************************************************
