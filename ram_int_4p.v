@@ -15,7 +15,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 //    input [ADDR_WIDTH - 1:0] wr_addr0, rd_addr0, wr_addr1, rd_addr1,
 //                              wr_addr2, rd_addr2, wr_addr3, rd_addr3,
 //    input [DATA_WIDTH - 1:0] wr_data0, wr_data1, wr_data2, wr_data3,
-    input CLOCK_50_B5B, CLOCK_50_B6A,// wr_en0, wr_en1, wr_en2, wr_en3, rd_en0,
+    input CLOCK_50_B5B, CLOCK_50_B7A,// wr_en0, wr_en1, wr_en2, wr_en3, rd_en0,
 //          rd_en1, rd_en2, rd_en3, reset,
 //    output reg rd_data_valid,
 //    output reg [DATA_WIDTH - 1:0] rd_data0, rd_data1, rd_data2, rd_data3,
@@ -115,7 +115,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   
   /* Instantiate extra PLL */
   PLL pll_inst(
-    .refclk(CLOCK_50_B6A),
+    .refclk(CLOCK_50_B7A),
     .rst(1'b0),
 		.outclk_0(pll0_pll_clk_clk),
 		.locked(pll_locked_int)
