@@ -103,7 +103,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   reg local_cal_fail_reg, local_cal_success_reg, local_init_done_reg,
       rd_data_valid;
   reg [DATA_WIDTH - 1:0] rd_data0, rd_data1, rd_data2, rd_data3;
-  reg [1:0] curr_state, next_state;
+  reg [1:0] curr_state;
   
   /* Instantiate In-System Sources and Probes */
   ISSP ISSP_inst(
@@ -160,7 +160,6 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
       prev_rd_addr0 <= {ADDR_WIDTH{1'h0}};
       prev_wr_addr0 <= {ADDR_WIDTH{1'h0}};
     end else
-      curr_state <= next_state;
     
     case (curr_state)
       INIT:   begin
@@ -168,14 +167,14 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                 if (pll_locked_ddr == `ASSERT_H &&
                       pll_locked_int == `ASSERT_H) begin
                   soft_reset_n <= `DEASSERT_L;
-                  next_state <= INIT;
+                  curr_state <= INIT;
                 end else
-                  next_state <= INIT;
+                  curr_state <= INIT;
                 if (local_cal_success == `ASSERT_H &&
                       soft_reset_n == `DEASSERT_L)
-                  next_state <= IDLE;
+                  curr_state <= IDLE;
                 else
-                  next_state <= INIT;
+                  curr_state <= INIT;
               end
             
       IDLE:   begin
@@ -183,12 +182,12 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                 avl_read_req_0 <= `DEASSERT_H;
                 if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
                       && prev_wr_addr0 != wr_addr0 && rd_en0 == `DEASSERT_L)
-                  next_state <= WRITE;
+                  curr_state <= WRITE;
                 else if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L 
                           && prev_rd_addr0 != rd_addr0 && wr_en0 == `DEASSERT_L)
-                  next_state <= READ;
+                  curr_state <= READ;
                 else
-                  next_state <= IDLE;
+                  curr_state <= IDLE;
               end
       
       WRITE:  begin
@@ -198,7 +197,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                   avl_addr_0 <= wr_addr0;
                   prev_wr_addr0 <= avl_addr_0;
                 end
-                next_state <= IDLE;
+                curr_state <= IDLE;
               end
       
       READ:   begin
@@ -208,7 +207,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                   avl_addr_0 <= rd_addr0;
                   prev_rd_addr0 <= avl_addr_0;
                 end
-                  next_state <= IDLE;
+                  curr_state <= IDLE;
               end
     endcase
   end
