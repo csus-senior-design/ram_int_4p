@@ -195,7 +195,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                   curr_state <= READ;
                   rd_rdy0 <= `ASSERT_H;
                   wr_rdy0 <= `DEASSERT_H;
-                end else if (wr_en == `ASSERT_L)
+                end else if (wr_en0 == `ASSERT_L)
                   curr_state <= WRITE;
                 else
                   curr_state <= IDLE;
@@ -217,7 +217,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                   curr_state <= WRITE;
                   wr_rdy0 <= `ASSERT_H;
                   rd_rdy0 <= `DEASSERT_H;
-                end else if (rd_en == `ASSERT_L)
+                end else if (rd_en0 == `ASSERT_L)
                   curr_state <= READ;
                 else
                   curr_state <= IDLE;
