@@ -94,12 +94,6 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
               prev_wr_addr2, prev_rd_addr2, prev_wr_addr3, prev_rd_addr3;
   reg [1:0] curr_state;
   
-  /* Declare source signals */
-  reg [ADDR_WIDTH - 1:0] wr_addr0, rd_addr0, wr_addr1, rd_addr1, wr_addr2,
-                          rd_addr2, wr_addr3, rd_addr3;
-  reg [DATA_WIDTH - 1:0] wr_data0, wr_data1, wr_data2, wr_data3;
-  reg wr_en0, wr_en1, wr_en2, wr_en3, rd_en0, rd_en1, rd_en2, rd_en3, reset;
-  
   /* Instantiate extra PLL */
   PLL pll_inst(
     .refclk(CLOCK_50_B7A),
