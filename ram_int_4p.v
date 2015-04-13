@@ -169,14 +169,16 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                 rd_rdy <= `DEASSERT_H;
                   
                 if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
-                      && prev_wr_addr0 != wr_addr0 && rd_en0 == `DEASSERT_L)
+                      && prev_wr_addr0 != wr_addr0
+                      && rd_en0 == `DEASSERT_L) begin
                   curr_state <= WRITE;
                   wr_rdy <= `ASSERT_H;
-                else if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L 
-                          && prev_rd_addr0 != rd_addr0 && wr_en0 == `DEASSERT_L)
+                end else if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L 
+                          && prev_rd_addr0 != rd_addr0
+                          && wr_en0 == `DEASSERT_L) begin
                   curr_state <= READ;
                   rd_rdy <= `ASSERT_H;
-                else
+                end else
                   curr_state <= IDLE;
               end
       
@@ -192,11 +194,11 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                 end
                 
                 if (rd_en == `ASSERT_L || (rd_en == `ASSERT_L &&
-                      wr_en == `ASSERT_L))
+                      wr_en == `ASSERT_L)) begin
                   curr_state <= READ;
                   rd_rdy <= `ASSERT_H;
                   wr_rdy <= `DEASSERT_H;
-                else if (wr_en == `ASSERT_L)
+                end else if (wr_en == `ASSERT_L)
                   curr_state <= WRITE;
                 else
                   curr_state <= IDLE;
@@ -214,11 +216,11 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                 end
                 
                 if (wr_en == `ASSERT_L || (rd_en == `ASSERT_L &&
-                        wr_en == `ASSERT_L))
+                        wr_en == `ASSERT_L)) begin
                   curr_state <= WRITE;
                   wr_rdy <= `ASSERT_H;
                   rd_rdy <= `DEASSERT_H;
-                else if (rd_en == `ASSERT_L)
+                end else if (rd_en == `ASSERT_L)
                   curr_state <= READ;
                 else
                   curr_state <= IDLE;
