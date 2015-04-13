@@ -102,11 +102,8 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 		.locked(pll_locked_int)
 	);
   
-  /* Flop the probe signals */
+  /* Flop data valid signal */
   always @(posedge pll0_pll_clk_clk) begin
-    local_cal_success_reg <= local_cal_success;
-    local_cal_fail_reg <= local_cal_fail;
-    local_init_done_reg <= local_init_done;
     rd_data_valid <= avl_rdata_valid_0;
   end
       
