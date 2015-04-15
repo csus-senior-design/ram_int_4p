@@ -1,6 +1,6 @@
 NOTE: 	The parameters shown below are the only ones that need to be changed.
 	The rest can be left as is. The .qprs file can be loaded to automatically
-	fill in all of these changes.
+	fill in all of these changes. Be sure to generate the LPDDR2 IP.
 
 Interface Type
 	Enable Hard External Memory Interface

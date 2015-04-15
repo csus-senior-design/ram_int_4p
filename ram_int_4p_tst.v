@@ -1,3 +1,7 @@
+/*  This is the module I used to validate my memory interface. The saved ISSP
+    and SignalTap files are Spf2.spf and stp1.stp respectively.
+*/
+
 `ifndef ASSERT_L
 `define ASSERT_L 1'b0
 `define DEASSERT_L 1'b1
