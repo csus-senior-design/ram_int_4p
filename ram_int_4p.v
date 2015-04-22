@@ -42,7 +42,8 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
     input [DATA_WIDTH - 1:0] wr_data0, wr_data1, wr_data2, wr_data3,
     input CLOCK_50_B5B, CLOCK_50_B7A, wr_en0, wr_en1, wr_en2, wr_en3, rd_en0,
           rd_en1, rd_en2, rd_en3, reset,
-    output reg rd_data_valid, wr_rdy0, rd_rdy0,
+    output rd_data_valid,
+    output reg wr_rdy0, rd_rdy0,
     output reg [DATA_WIDTH - 1:0] rd_data0, rd_data1, rd_data2, rd_data3,
 		output wire [9:0]  mem_ca,                   //       memory.mem_ca
 		output wire [0:0]  mem_ck,                   //             .mem_ck
@@ -127,10 +128,8 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 		.locked(pll_locked_int)
 	);
   
-  /* Flop data valid signal */
-  always @(posedge pll0_pll_clk_clk) begin
-    rd_data_valid <= avl_rdata_valid_0;
-  end
+  /* Assign valid read data signal */
+  assign rd_data_valid = avl_rdata_valid_0;
       
   /* Begin interface logic */
   always @(posedge pll0_pll_clk_clk) begin
