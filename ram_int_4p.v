@@ -7,7 +7,8 @@
       You will also have to generate the necessary IP for this memory
       interface. Instructions for generating the IP are located in the
       "C5G LPDDR2 IP Parameters.txt" file. Use the C5G_LPDDR2_Settings.qprs
-      file to automatically enter all timing parameters for the IP.
+      file to automatically enter all timing parameters for the IP. MAKE SURE
+      TO NAME THE IP "LPDDR2x32_4p" WITHOUT THE QUOTES.
       
       Use the ram_int_4p.qsf file for the pin assignments that are necessary
       for this module.
