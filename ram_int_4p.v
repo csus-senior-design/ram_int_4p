@@ -1,26 +1,44 @@
-/*  Instructions
-      This module will have to be instantiated in the top level module for the
-      project. The following signals must be brought up through to the top
-      level module's IOs: mem_ca, mem_ck, mem_ck_n, mem_cke, mem_cs_n, mem_dm,
-      mem_dq, mem_dqs, mem_dqs_n, and oct_rzqin.
-      
-      You will also have to generate the necessary IP for this memory
-      interface. Instructions for generating the IP are located in the
-      "C5G LPDDR2 IP Parameters.txt" file. Use the C5G_LPDDR2_Settings.qprs
-      file to automatically enter all timing parameters for the IP. MAKE SURE
-      TO NAME THE IP "LPDDR2x32_4p" WITHOUT THE QUOTES.
-      
-      Use the ram_int_4p.qsf file for the pin assignments that are necessary
-      for this module.
-      
-      The PLL IP will probably have to be generated. Make sure it uses a 50MHz
-      reference clock, and ensure that the IP name is "PLL" without the quotes.
-      When generating the PLL IP, refer to line 119 in this module where the
-      PLL is instantiated in order to ensure that the proper ports are
-      generated.
-      
-      Refer to the frame_buf_alt_tb.v file for an example of how to connect the
-      frame buffer module to this module.
+/*
+--------------------------------------------------
+Stereoscopic Vision System
+Senior Design Project - Team Honeybadger (Team 11)
+California State University, Sacramento
+Spring 2015 / Fall 2015
+--------------------------------------------------
+
+Stereoscopic Image Capture Top Level Module
+Authors: Padraic Hagerty (guitarisrockin@hotmail.com)
+
+Description:
+  This is the four-port memory interface for the Altera Cyclone 5 GX Starter
+  Kit. The external memory IP deals with all arbitration, and it provides FIFOs
+  for each port. This module abstracts away many of the control signals for the
+  hard memory controller IP so the user can simply assert read and write enable
+  signals to perform operations in the memory.
+  
+Instructions:
+  This module will have to be instantiated in the top level module for the
+  project. The following signals must be brought up through to the top
+  level module's IOs: mem_ca, mem_ck, mem_ck_n, mem_cke, mem_cs_n, mem_dm,
+  mem_dq, mem_dqs, mem_dqs_n, and oct_rzqin.
+  
+  You will also have to generate the necessary IP for this memory
+  interface. Instructions for generating the IP are located in the
+  "C5G LPDDR2 IP Parameters.txt" file. Use the C5G_LPDDR2_Settings.qprs
+  file to automatically enter all timing parameters for the IP. MAKE SURE
+  TO NAME THE IP "LPDDR2x32_4p" WITHOUT THE QUOTES.
+  
+  Use the ram_int_4p.qsf file for the pin assignments that are necessary
+  for this module.
+  
+  The PLL IP will probably have to be generated. Make sure it uses a 50MHz
+  reference clock, and ensure that the IP name is "PLL" without the quotes.
+  When generating the PLL IP, refer to line 119 in this module where the
+  PLL is instantiated in order to ensure that the proper ports are
+  generated.
+  
+  Refer to the frame_buf_alt_tb.v file for an example of how to connect the
+  frame buffer module to this module.
 */
 
 `ifndef ASSERT_L
