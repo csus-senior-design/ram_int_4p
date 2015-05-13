@@ -339,6 +339,8 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                 else
                   curr_state1 <= IDLE;
               end
+              
+      default:  curr_state1 <= IDLE;
     endcase
   end
   /* End port 1 interface logic */
