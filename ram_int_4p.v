@@ -50,102 +50,139 @@ Instructions:
 `define DEASSERT_H 1'b0
 `endif
 
-`timescale 1 ps / 1 ps
+`timescale 1 ns / 1 ps
 
 module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
                   MEM_DEPTH = 1 << ADDR_WIDTH, BE = 4'h7)
   (
-    input [ADDR_WIDTH - 1:0] wr_addr0, rd_addr0, wr_addr1, rd_addr1,
-                              wr_addr2, rd_addr2, wr_addr3, rd_addr3,
-    input [DATA_WIDTH - 1:0] wr_data0, wr_data1, wr_data2, wr_data3,
-    input CLOCK_50_B5B, CLOCK_50_B7A, wr_en0, wr_en1, wr_en2, wr_en3, rd_en0,
-          rd_en1, rd_en2, rd_en3, reset,
-    output rd_data_valid0, rd_data_valid1, rd_data_valid2, rd_data_valid3,
-    output reg wr_rdy0, rd_rdy0, wr_rdy1, rd_rdy1, wr_rdy2, rd_rdy2, wr_rdy3,
-                rd_rdy3,
-    output reg [DATA_WIDTH - 1:0] rd_data0, rd_data1, rd_data2, rd_data3,
-		output wire [9:0]  mem_ca,                   //       memory.mem_ca
-		output wire [0:0]  mem_ck,                   //             .mem_ck
-		output wire [0:0]  mem_ck_n,                 //             .mem_ck_n
-		output wire [0:0]  mem_cke,                  //             .mem_cke
-		output wire [0:0]  mem_cs_n,                 //             .mem_cs_n
-		output wire [3:0]  mem_dm,                   //             .mem_dm
-		inout  wire [31:0] mem_dq,                   //             .mem_dq
-		inout  wire [3:0]  mem_dqs,                  //             .mem_dqs
-		inout  wire [3:0]  mem_dqs_n,                //             .mem_dqs_n
-		input  wire        oct_rzqin                 //          oct.rzqin
+    input       [ADDR_WIDTH - 1:0]    wr_addr0,
+                                      rd_addr0,
+                                      wr_addr1,
+                                      rd_addr1,
+                                      wr_addr2,
+                                      rd_addr2,
+                                      wr_addr3,
+                                      rd_addr3,
+    input       [DATA_WIDTH - 1:0]    wr_data0,
+                                      wr_data1,
+                                      wr_data2,
+                                      wr_data3,
+    input                             CLOCK_50_B5B,
+                                      CLOCK_50_B7A,
+                                      CLOCK_125_p,
+                                      wr_en0,
+                                      wr_en1,
+                                      wr_en2,
+                                      wr_en3,
+                                      rd_en0,
+                                      rd_en1,
+                                      rd_en2,
+                                      rd_en3,
+                                      reset,
+    output                            rd_data_valid0,
+                                      rd_data_valid1,
+                                      rd_data_valid2,
+                                      rd_data_valid3,
+    output  reg                       wr_rdy0,
+                                      rd_rdy0,
+                                      wr_rdy1,
+                                      rd_rdy1,
+                                      wr_rdy2,
+                                      rd_rdy2,
+                                      wr_rdy3,
+                                      rd_rdy3,
+    output  reg   [DATA_WIDTH - 1:0]  rd_data0,
+                                      rd_data1,
+                                      rd_data2,
+                                      rd_data3,
+		output  wire  [9:0]               mem_ca,
+		output  wire  [0:0]               mem_ck,
+		output  wire  [0:0]               mem_ck_n,
+		output  wire  [0:0]               mem_cke,
+		output  wire  [0:0]               mem_cs_n,
+		output  wire  [3:0]               mem_dm,
+		inout   wire  [31:0]              mem_dq,
+		inout   wire  [3:0]               mem_dqs,
+		inout   wire  [3:0]               mem_dqs_n,
+		input   wire                      oct_rzqin
   );
   
   /* Define the required states. */
-  parameter INIT = 2'h0, IDLE = 2'h1, WRITE = 2'h2, READ = 2'h3;
+  localparam
+    INIT = 2'h0,
+    IDLE = 2'h1,
+    WRITE = 2'h2,
+    READ = 2'h3;
 
   /* Make necessary declarations for the hard memory controller IP. */
-  wire         pll_locked_ddr, pll_locked_int;
-  wire         pll0_pll_clk_clk;
+  wire          pll_locked_ddr, pll_locked_int;
+  //wire         pll0_pll_clk_clk;
   
-	reg          avl_burstbegin_0;
-	wire         avl_ready_0;
-	reg   [28:0] avl_addr_0;
-	reg          avl_read_req_0;
-	wire   [3:0] avl_be_0;
-	wire         avl_rdata_valid_0;
-	reg          avl_write_req_0;
-	reg    [2:0] avl_size_0;
+	reg           avl_burstbegin_0;
+	wire          avl_ready_0;
+	reg   [28:0]  avl_addr_0;
+	reg           avl_read_req_0;
+	wire  [3:0]   avl_be_0;
+	wire          avl_rdata_valid_0;
+	reg           avl_write_req_0;
+	reg   [2:0]   avl_size_0;
   
-  reg          avl_burstbegin_1;
-	wire         avl_ready_1;
-	reg   [28:0] avl_addr_1;
-	reg          avl_read_req_1;
-	wire   [3:0] avl_be_1;
-	wire         avl_rdata_valid_1;
-	reg          avl_write_req_1;
-	reg    [2:0] avl_size_1;
+  reg           avl_burstbegin_1;
+	wire          avl_ready_1;
+	reg   [28:0]  avl_addr_1;
+	reg           avl_read_req_1;
+	wire  [3:0]   avl_be_1;
+	wire          avl_rdata_valid_1;
+	reg           avl_write_req_1;
+	reg   [2:0]   avl_size_1;
   
-  reg          avl_burstbegin_2;
-	wire         avl_ready_2;
-	reg   [28:0] avl_addr_2;
-	reg          avl_read_req_2;
-	wire   [3:0] avl_be_2;
-	wire         avl_rdata_valid_2;
-	reg          avl_write_req_2;
-	reg    [2:0] avl_size_2;
+  reg           avl_burstbegin_2;
+	wire          avl_ready_2;
+	reg   [28:0]  avl_addr_2;
+	reg           avl_read_req_2;
+	wire  [3:0]   avl_be_2;
+	wire          avl_rdata_valid_2;
+	reg           avl_write_req_2;
+	reg   [2:0]   avl_size_2;
   
-  reg          avl_burstbegin_3;
-	wire         avl_ready_3;
-	reg   [28:0] avl_addr_3;
-	reg          avl_read_req_3;
-	wire   [3:0] avl_be_3;
-	wire         avl_rdata_valid_3;
-	reg          avl_write_req_3;
-	reg    [2:0] avl_size_3;
+  reg           avl_burstbegin_3;
+	wire          avl_ready_3;
+	reg   [28:0]  avl_addr_3;
+	reg           avl_read_req_3;
+	wire  [3:0]   avl_be_3;
+	wire          avl_rdata_valid_3;
+	reg           avl_write_req_3;
+	reg   [2:0]   avl_size_3;
   
-	wire         rst_controller_reset_out_reset;
-	wire         pll0_reset_out_reset;
-	wire         rst_controller_001_reset_out_reset;
-	wire         rst_controller_002_reset_out_reset;
-	wire         rst_controller_003_reset_out_reset;
-	wire         rst_controller_004_reset_out_reset;
-	wire         rst_controller_005_reset_out_reset;
-	wire         rst_controller_006_reset_out_reset;
-	wire         rst_controller_007_reset_out_reset;
-	wire         rst_controller_008_reset_out_reset;
-	wire         rst_controller_009_reset_out_reset;
-	wire         rst_controller_010_reset_out_reset;
-	wire         rst_controller_011_reset_out_reset;
+	wire          rst_controller_reset_out_reset;
+	wire          pll0_reset_out_reset;
+	wire          rst_controller_001_reset_out_reset;
+	wire          rst_controller_002_reset_out_reset;
+	wire          rst_controller_003_reset_out_reset;
+	wire          rst_controller_004_reset_out_reset;
+	wire          rst_controller_005_reset_out_reset;
+	wire          rst_controller_006_reset_out_reset;
+	wire          rst_controller_007_reset_out_reset;
+	wire          rst_controller_008_reset_out_reset;
+	wire          rst_controller_009_reset_out_reset;
+	wire          rst_controller_010_reset_out_reset;
+	wire          rst_controller_011_reset_out_reset;
   
-  wire local_cal_fail, local_cal_success, local_init_done;
-  reg global_reset_n, soft_reset_n;
-  reg [28:0] prev_wr_addr0, prev_rd_addr0, prev_wr_addr1, prev_rd_addr1,
-              prev_wr_addr2, prev_rd_addr2, prev_wr_addr3, prev_rd_addr3;
-  reg [1:0] curr_state0, curr_state1, curr_state2, curr_state3;
+  wire          local_cal_fail, local_cal_success, local_init_done;
+  reg           global_reset_n, soft_reset_n;
+  reg   [28:0]  prev_wr_addr0, prev_rd_addr0, prev_wr_addr1, prev_rd_addr1,
+                prev_wr_addr2, prev_rd_addr2, prev_wr_addr3, prev_rd_addr3;
+  
+  (* syn_encoding = "safe" *)
+  reg   [1:0]   curr_state0, curr_state1, curr_state2, curr_state3;
   
   /* Instantiate extra PLL */
-  PLL pll_inst(
+  /*PLL pll_inst(
     .refclk(CLOCK_50_B7A),
     .rst(1'b0),
 		.outclk_0(pll0_pll_clk_clk),
 		.locked(pll_locked_int)
-	);
+	);*/
   
   /* Assign valid read data signals */
   assign rd_data_valid0 = avl_rdata_valid_0;
@@ -154,7 +191,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   assign rd_data_valid3 = avl_rdata_valid_3;
       
   /* Begin port 0 interface logic */
-  always @(posedge pll0_pll_clk_clk) begin
+  always @(posedge CLOCK_125_p) begin
     if (reset == `ASSERT_L) begin
       global_reset_n <= `ASSERT_L;
       soft_reset_n <= `ASSERT_L;
@@ -174,91 +211,91 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
     end else
     
     case (curr_state0)
-      INIT:   begin
-                global_reset_n <= `DEASSERT_L;
-                if (pll_locked_ddr == `ASSERT_H &&
-                      pll_locked_int == `ASSERT_H) begin
-                  soft_reset_n <= `DEASSERT_L;
-                  curr_state0 <= INIT;
-                end else
-                  curr_state0 <= INIT;
-                if (local_cal_success == `ASSERT_H &&
-                      soft_reset_n == `DEASSERT_L)
-                  curr_state0 <= IDLE;
-                else
-                  curr_state0 <= INIT;
-              end
+      INIT: begin
+        global_reset_n <= `DEASSERT_L;
+        if (pll_locked_ddr == `ASSERT_H &&
+              pll_locked_int == `ASSERT_H) begin
+          soft_reset_n <= `DEASSERT_L;
+          curr_state0 <= INIT;
+        end else
+          curr_state0 <= INIT;
+        if (local_cal_success == `ASSERT_H &&
+              soft_reset_n == `DEASSERT_L)
+          curr_state0 <= IDLE;
+        else
+          curr_state0 <= INIT;
+      end
             
-      IDLE:   begin
-                avl_write_req_0 <= `DEASSERT_H;
-                avl_read_req_0 <= `DEASSERT_H;
-                
-                wr_rdy0 <= `DEASSERT_H;
-                rd_rdy0 <= `DEASSERT_H;
-                  
-                if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
-                      && prev_wr_addr0 != wr_addr0
-                      && rd_en0 == `DEASSERT_L) begin
-                  curr_state0 <= WRITE;
-                  wr_rdy0 <= `ASSERT_H;
-                end else if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L 
-                          && prev_rd_addr0 != rd_addr0
-                          && wr_en0 == `DEASSERT_L) begin
-                  curr_state0 <= READ;
-                  rd_rdy0 <= `ASSERT_H;
-                end else
-                  curr_state0 <= IDLE;
-              end
+      IDLE: begin
+        avl_write_req_0 <= `DEASSERT_H;
+        avl_read_req_0 <= `DEASSERT_H;
+        
+        wr_rdy0 <= `DEASSERT_H;
+        rd_rdy0 <= `DEASSERT_H;
+          
+        if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
+              && prev_wr_addr0 != wr_addr0
+              && rd_en0 == `DEASSERT_L) begin
+          curr_state0 <= WRITE;
+          wr_rdy0 <= `ASSERT_H;
+        end else if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L 
+                  && prev_rd_addr0 != rd_addr0
+                  && wr_en0 == `DEASSERT_L) begin
+          curr_state0 <= READ;
+          rd_rdy0 <= `ASSERT_H;
+        end else
+          curr_state0 <= IDLE;
+      end
       
-      WRITE:  begin
-                wr_rdy0 <= `ASSERT_H;
-                rd_rdy0 <= `DEASSERT_H;
+      WRITE: begin
+        wr_rdy0 <= `ASSERT_H;
+        rd_rdy0 <= `DEASSERT_H;
+
+        if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
+               && rd_en0 == `DEASSERT_L) begin
+          avl_write_req_0 <= `ASSERT_H;
+          avl_addr_0 <= wr_addr0;
+          prev_wr_addr0 <= avl_addr_0;
+        end
+        
+        if (rd_en0 == `ASSERT_L || (rd_en0 == `ASSERT_L &&
+              wr_en0 == `ASSERT_L)) begin
+          curr_state0 <= READ;
+          rd_rdy0 <= `ASSERT_H;
+          wr_rdy0 <= `DEASSERT_H;
+        end else if (wr_en0 == `ASSERT_L)
+          curr_state0 <= WRITE;
+        else
+          curr_state0 <= IDLE;
+      end
       
-                if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
-                       && rd_en0 == `DEASSERT_L) begin
-                  avl_write_req_0 <= `ASSERT_H;
-                  avl_addr_0 <= wr_addr0;
-                  prev_wr_addr0 <= avl_addr_0;
-                end
-                
-                if (rd_en0 == `ASSERT_L || (rd_en0 == `ASSERT_L &&
-                      wr_en0 == `ASSERT_L)) begin
-                  curr_state0 <= READ;
-                  rd_rdy0 <= `ASSERT_H;
-                  wr_rdy0 <= `DEASSERT_H;
-                end else if (wr_en0 == `ASSERT_L)
-                  curr_state0 <= WRITE;
-                else
-                  curr_state0 <= IDLE;
-              end
-      
-      READ:   begin
-                rd_rdy0 <= `ASSERT_H;
-                wr_rdy0 <= `DEASSERT_H;
-      
-                if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L
-                       && wr_en0 == `DEASSERT_L) begin
-                  avl_read_req_0 <= `ASSERT_H;
-                  avl_addr_0 <= rd_addr0;
-                  prev_rd_addr0 <= avl_addr_0;
-                end
-                
-                if (wr_en0 == `ASSERT_L || (rd_en0 == `ASSERT_L &&
-                        wr_en0 == `ASSERT_L)) begin
-                  curr_state0 <= WRITE;
-                  wr_rdy0 <= `ASSERT_H;
-                  rd_rdy0 <= `DEASSERT_H;
-                end else if (rd_en0 == `ASSERT_L)
-                  curr_state0 <= READ;
-                else
-                  curr_state0 <= IDLE;
-              end
+      READ: begin
+        rd_rdy0 <= `ASSERT_H;
+        wr_rdy0 <= `DEASSERT_H;
+
+        if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L
+               && wr_en0 == `DEASSERT_L) begin
+          avl_read_req_0 <= `ASSERT_H;
+          avl_addr_0 <= rd_addr0;
+          prev_rd_addr0 <= avl_addr_0;
+        end
+        
+        if (wr_en0 == `ASSERT_L || (rd_en0 == `ASSERT_L &&
+                wr_en0 == `ASSERT_L)) begin
+          curr_state0 <= WRITE;
+          wr_rdy0 <= `ASSERT_H;
+          rd_rdy0 <= `DEASSERT_H;
+        end else if (rd_en0 == `ASSERT_L)
+          curr_state0 <= READ;
+        else
+          curr_state0 <= IDLE;
+      end
     endcase
   end
   /* End port 0 interface logic */
   
   /* Begin port 1 interface logic */
-  always @(posedge pll0_pll_clk_clk) begin
+  always @(posedge CLOCK_125_p) begin
     if (reset == `ASSERT_L) begin
       curr_state1 <= IDLE;
       
@@ -275,70 +312,70 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
     end else
     
     case (curr_state1)
-      IDLE:   begin
-                avl_write_req_1 <= `DEASSERT_H;
-                avl_read_req_1 <= `DEASSERT_H;
-                
-                wr_rdy1 <= `DEASSERT_H;
-                rd_rdy1 <= `DEASSERT_H;
-                  
-                if (avl_ready_1 == `ASSERT_H && wr_en1 == `ASSERT_L
-                      && prev_wr_addr1 != wr_addr1
-                      && rd_en1 == `DEASSERT_L) begin
-                  curr_state1 <= WRITE;
-                  wr_rdy1 <= `ASSERT_H;
-                end else if (avl_ready_1 == `ASSERT_H && rd_en1 == `ASSERT_L 
-                          && prev_rd_addr1 != rd_addr1
-                          && wr_en1 == `DEASSERT_L) begin
-                  curr_state1 <= READ;
-                  rd_rdy1 <= `ASSERT_H;
-                end else
-                  curr_state1 <= IDLE;
-              end
+      IDLE: begin
+        avl_write_req_1 <= `DEASSERT_H;
+        avl_read_req_1 <= `DEASSERT_H;
+        
+        wr_rdy1 <= `DEASSERT_H;
+        rd_rdy1 <= `DEASSERT_H;
+          
+        if (avl_ready_1 == `ASSERT_H && wr_en1 == `ASSERT_L
+              && prev_wr_addr1 != wr_addr1
+              && rd_en1 == `DEASSERT_L) begin
+          curr_state1 <= WRITE;
+          wr_rdy1 <= `ASSERT_H;
+        end else if (avl_ready_1 == `ASSERT_H && rd_en1 == `ASSERT_L 
+                  && prev_rd_addr1 != rd_addr1
+                  && wr_en1 == `DEASSERT_L) begin
+          curr_state1 <= READ;
+          rd_rdy1 <= `ASSERT_H;
+        end else
+          curr_state1 <= IDLE;
+      end
       
-      WRITE:  begin
-                wr_rdy1 <= `ASSERT_H;
-                rd_rdy1 <= `DEASSERT_H;
+      WRITE: begin
+        wr_rdy1 <= `ASSERT_H;
+        rd_rdy1 <= `DEASSERT_H;
+
+        if (avl_ready_1 == `ASSERT_H && wr_en1 == `ASSERT_L
+               && rd_en1 == `DEASSERT_L) begin
+          avl_write_req_1 <= `ASSERT_H;
+          avl_addr_1 <= wr_addr1;
+          prev_wr_addr1 <= avl_addr_1;
+        end
+        
+        if (rd_en1 == `ASSERT_L || (rd_en1 == `ASSERT_L &&
+              wr_en1 == `ASSERT_L)) begin
+          curr_state1 <= READ;
+          rd_rdy1 <= `ASSERT_H;
+          wr_rdy1 <= `DEASSERT_H;
+        end else if (wr_en1 == `ASSERT_L)
+          curr_state1 <= WRITE;
+        else
+          curr_state1 <= IDLE;
+      end
       
-                if (avl_ready_1 == `ASSERT_H && wr_en1 == `ASSERT_L
-                       && rd_en1 == `DEASSERT_L) begin
-                  avl_write_req_1 <= `ASSERT_H;
-                  avl_addr_1 <= wr_addr1;
-                  prev_wr_addr1 <= avl_addr_1;
-                end
-                
-                if (rd_en1 == `ASSERT_L || (rd_en1 == `ASSERT_L &&
-                      wr_en1 == `ASSERT_L)) begin
-                  curr_state1 <= READ;
-                  rd_rdy1 <= `ASSERT_H;
-                  wr_rdy1 <= `DEASSERT_H;
-                end else if (wr_en1 == `ASSERT_L)
-                  curr_state1 <= WRITE;
-                else
-                  curr_state1 <= IDLE;
-              end
-      
-      READ:   begin
-                rd_rdy1 <= `ASSERT_H;
-                wr_rdy1 <= `DEASSERT_H;
-      
-                if (avl_ready_1 == `ASSERT_H && rd_en1 == `ASSERT_L
-                       && wr_en1 == `DEASSERT_L) begin
-                  avl_read_req_1 <= `ASSERT_H;
-                  avl_addr_1 <= rd_addr1;
-                  prev_rd_addr1 <= avl_addr_1;
-                end
-                
-                if (wr_en1 == `ASSERT_L || (rd_en1 == `ASSERT_L &&
-                        wr_en1 == `ASSERT_L)) begin
-                  curr_state1 <= WRITE;
-                  wr_rdy1 <= `ASSERT_H;
-                  rd_rdy1 <= `DEASSERT_H;
-                end else if (rd_en1 == `ASSERT_L)
-                  curr_state1 <= READ;
-                else
-                  curr_state1 <= IDLE;
-              end
+      READ: begin
+        rd_rdy1 <= `ASSERT_H;
+        wr_rdy1 <= `DEASSERT_H;
+
+        if (avl_ready_1 == `ASSERT_H && rd_en1 == `ASSERT_L
+               && wr_en1 == `DEASSERT_L) begin
+          avl_read_req_1 <= `ASSERT_H;
+          avl_addr_1 <= rd_addr1;
+          prev_rd_addr1 <= avl_addr_1;
+        end
+        
+        if (wr_en1 == `ASSERT_L || (rd_en1 == `ASSERT_L &&
+                wr_en1 == `ASSERT_L)) begin
+          curr_state1 <= WRITE;
+          wr_rdy1 <= `ASSERT_H;
+          rd_rdy1 <= `DEASSERT_H;
+        end else if (rd_en1 == `ASSERT_L)
+          curr_state1 <= READ;
+        else
+          curr_state1 <= IDLE;
+      end
               
       default:  curr_state1 <= IDLE;
     endcase
@@ -346,7 +383,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   /* End port 1 interface logic */
   
   /* Begin port 2 interface logic */
-  always @(posedge pll0_pll_clk_clk) begin
+  always @(posedge CLOCK_125_p) begin
     if (reset == `ASSERT_L) begin
       curr_state2 <= IDLE;
       
@@ -363,70 +400,70 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
     end else
     
     case (curr_state2)
-      IDLE:   begin
-                avl_write_req_2 <= `DEASSERT_H;
-                avl_read_req_2 <= `DEASSERT_H;
-                
-                wr_rdy2 <= `DEASSERT_H;
-                rd_rdy2 <= `DEASSERT_H;
-                  
-                if (avl_ready_2 == `ASSERT_H && wr_en2 == `ASSERT_L
-                      && prev_wr_addr2 != wr_addr2
-                      && rd_en2 == `DEASSERT_L) begin
-                  curr_state2 <= WRITE;
-                  wr_rdy2 <= `ASSERT_H;
-                end else if (avl_ready_2 == `ASSERT_H && rd_en2 == `ASSERT_L 
-                          && prev_rd_addr2 != rd_addr2
-                          && wr_en2 == `DEASSERT_L) begin
-                  curr_state2 <= READ;
-                  rd_rdy2 <= `ASSERT_H;
-                end else
-                  curr_state2 <= IDLE;
-              end
+      IDLE: begin
+        avl_write_req_2 <= `DEASSERT_H;
+        avl_read_req_2 <= `DEASSERT_H;
+        
+        wr_rdy2 <= `DEASSERT_H;
+        rd_rdy2 <= `DEASSERT_H;
+          
+        if (avl_ready_2 == `ASSERT_H && wr_en2 == `ASSERT_L
+              && prev_wr_addr2 != wr_addr2
+              && rd_en2 == `DEASSERT_L) begin
+          curr_state2 <= WRITE;
+          wr_rdy2 <= `ASSERT_H;
+        end else if (avl_ready_2 == `ASSERT_H && rd_en2 == `ASSERT_L 
+                  && prev_rd_addr2 != rd_addr2
+                  && wr_en2 == `DEASSERT_L) begin
+          curr_state2 <= READ;
+          rd_rdy2 <= `ASSERT_H;
+        end else
+          curr_state2 <= IDLE;
+      end
       
-      WRITE:  begin
-                wr_rdy2 <= `ASSERT_H;
-                rd_rdy2 <= `DEASSERT_H;
+      WRITE: begin
+        wr_rdy2 <= `ASSERT_H;
+        rd_rdy2 <= `DEASSERT_H;
+
+        if (avl_ready_2 == `ASSERT_H && wr_en2 == `ASSERT_L
+               && rd_en2 == `DEASSERT_L) begin
+          avl_write_req_2 <= `ASSERT_H;
+          avl_addr_2 <= wr_addr2;
+          prev_wr_addr2 <= avl_addr_2;
+        end
+        
+        if (rd_en2 == `ASSERT_L || (rd_en2 == `ASSERT_L &&
+              wr_en2 == `ASSERT_L)) begin
+          curr_state2 <= READ;
+          rd_rdy2 <= `ASSERT_H;
+          wr_rdy2 <= `DEASSERT_H;
+        end else if (wr_en2 == `ASSERT_L)
+          curr_state2 <= WRITE;
+        else
+          curr_state2 <= IDLE;
+      end
       
-                if (avl_ready_2 == `ASSERT_H && wr_en2 == `ASSERT_L
-                       && rd_en2 == `DEASSERT_L) begin
-                  avl_write_req_2 <= `ASSERT_H;
-                  avl_addr_2 <= wr_addr2;
-                  prev_wr_addr2 <= avl_addr_2;
-                end
-                
-                if (rd_en2 == `ASSERT_L || (rd_en2 == `ASSERT_L &&
-                      wr_en2 == `ASSERT_L)) begin
-                  curr_state2 <= READ;
-                  rd_rdy2 <= `ASSERT_H;
-                  wr_rdy2 <= `DEASSERT_H;
-                end else if (wr_en2 == `ASSERT_L)
-                  curr_state2 <= WRITE;
-                else
-                  curr_state2 <= IDLE;
-              end
-      
-      READ:   begin
-                rd_rdy2 <= `ASSERT_H;
-                wr_rdy2 <= `DEASSERT_H;
-      
-                if (avl_ready_2 == `ASSERT_H && rd_en2 == `ASSERT_L
-                       && wr_en2 == `DEASSERT_L) begin
-                  avl_read_req_2 <= `ASSERT_H;
-                  avl_addr_2 <= rd_addr2;
-                  prev_rd_addr2 <= avl_addr_2;
-                end
-                
-                if (wr_en2 == `ASSERT_L || (rd_en2 == `ASSERT_L &&
-                        wr_en2 == `ASSERT_L)) begin
-                  curr_state2 <= WRITE;
-                  wr_rdy2 <= `ASSERT_H;
-                  rd_rdy2 <= `DEASSERT_H;
-                end else if (rd_en2 == `ASSERT_L)
-                  curr_state2 <= READ;
-                else
-                  curr_state2 <= IDLE;
-              end
+      READ: begin
+        rd_rdy2 <= `ASSERT_H;
+        wr_rdy2 <= `DEASSERT_H;
+
+        if (avl_ready_2 == `ASSERT_H && rd_en2 == `ASSERT_L
+               && wr_en2 == `DEASSERT_L) begin
+          avl_read_req_2 <= `ASSERT_H;
+          avl_addr_2 <= rd_addr2;
+          prev_rd_addr2 <= avl_addr_2;
+        end
+        
+        if (wr_en2 == `ASSERT_L || (rd_en2 == `ASSERT_L &&
+                wr_en2 == `ASSERT_L)) begin
+          curr_state2 <= WRITE;
+          wr_rdy2 <= `ASSERT_H;
+          rd_rdy2 <= `DEASSERT_H;
+        end else if (rd_en2 == `ASSERT_L)
+          curr_state2 <= READ;
+        else
+          curr_state2 <= IDLE;
+      end
               
       default:  curr_state2 <= IDLE;
     endcase
@@ -434,7 +471,7 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
   /* End port 2 interface logic */
   
   /* Begin port 3 interface logic */
-  always @(posedge pll0_pll_clk_clk) begin
+  always @(posedge CLOCK_125_p) begin
     if (reset == `ASSERT_L) begin
       curr_state3 <= IDLE;
       
@@ -451,70 +488,70 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
     end else
     
     case (curr_state3)
-      IDLE:   begin
-                avl_write_req_3 <= `DEASSERT_H;
-                avl_read_req_3 <= `DEASSERT_H;
-                
-                wr_rdy3 <= `DEASSERT_H;
-                rd_rdy3 <= `DEASSERT_H;
-                  
-                if (avl_ready_3 == `ASSERT_H && wr_en3 == `ASSERT_L
-                      && prev_wr_addr3 != wr_addr3
-                      && rd_en3 == `DEASSERT_L) begin
-                  curr_state3 <= WRITE;
-                  wr_rdy3 <= `ASSERT_H;
-                end else if (avl_ready_3 == `ASSERT_H && rd_en3 == `ASSERT_L 
-                          && prev_rd_addr3 != rd_addr3
-                          && wr_en3 == `DEASSERT_L) begin
-                  curr_state3 <= READ;
-                  rd_rdy3 <= `ASSERT_H;
-                end else
-                  curr_state3 <= IDLE;
-              end
+      IDLE: begin
+        avl_write_req_3 <= `DEASSERT_H;
+        avl_read_req_3 <= `DEASSERT_H;
+        
+        wr_rdy3 <= `DEASSERT_H;
+        rd_rdy3 <= `DEASSERT_H;
+          
+        if (avl_ready_3 == `ASSERT_H && wr_en3 == `ASSERT_L
+              && prev_wr_addr3 != wr_addr3
+              && rd_en3 == `DEASSERT_L) begin
+          curr_state3 <= WRITE;
+          wr_rdy3 <= `ASSERT_H;
+        end else if (avl_ready_3 == `ASSERT_H && rd_en3 == `ASSERT_L 
+                  && prev_rd_addr3 != rd_addr3
+                  && wr_en3 == `DEASSERT_L) begin
+          curr_state3 <= READ;
+          rd_rdy3 <= `ASSERT_H;
+        end else
+          curr_state3 <= IDLE;
+      end
       
-      WRITE:  begin
-                wr_rdy3 <= `ASSERT_H;
-                rd_rdy3 <= `DEASSERT_H;
+      WRITE: begin
+        wr_rdy3 <= `ASSERT_H;
+        rd_rdy3 <= `DEASSERT_H;
+
+        if (avl_ready_3 == `ASSERT_H && wr_en3 == `ASSERT_L
+               && rd_en3 == `DEASSERT_L) begin
+          avl_write_req_3 <= `ASSERT_H;
+          avl_addr_3 <= wr_addr3;
+          prev_wr_addr3 <= avl_addr_3;
+        end
+        
+        if (rd_en3 == `ASSERT_L || (rd_en3 == `ASSERT_L &&
+              wr_en3 == `ASSERT_L)) begin
+          curr_state3 <= READ;
+          rd_rdy3 <= `ASSERT_H;
+          wr_rdy3 <= `DEASSERT_H;
+        end else if (wr_en3 == `ASSERT_L)
+          curr_state3 <= WRITE;
+        else
+          curr_state3 <= IDLE;
+      end
       
-                if (avl_ready_3 == `ASSERT_H && wr_en3 == `ASSERT_L
-                       && rd_en3 == `DEASSERT_L) begin
-                  avl_write_req_3 <= `ASSERT_H;
-                  avl_addr_3 <= wr_addr3;
-                  prev_wr_addr3 <= avl_addr_3;
-                end
-                
-                if (rd_en3 == `ASSERT_L || (rd_en3 == `ASSERT_L &&
-                      wr_en3 == `ASSERT_L)) begin
-                  curr_state3 <= READ;
-                  rd_rdy3 <= `ASSERT_H;
-                  wr_rdy3 <= `DEASSERT_H;
-                end else if (wr_en3 == `ASSERT_L)
-                  curr_state3 <= WRITE;
-                else
-                  curr_state3 <= IDLE;
-              end
-      
-      READ:   begin
-                rd_rdy3 <= `ASSERT_H;
-                wr_rdy3 <= `DEASSERT_H;
-      
-                if (avl_ready_3 == `ASSERT_H && rd_en3 == `ASSERT_L
-                       && wr_en3 == `DEASSERT_L) begin
-                  avl_read_req_3 <= `ASSERT_H;
-                  avl_addr_3 <= rd_addr3;
-                  prev_rd_addr3 <= avl_addr_3;
-                end
-                
-                if (wr_en3 == `ASSERT_L || (rd_en3 == `ASSERT_L &&
-                        wr_en3 == `ASSERT_L)) begin
-                  curr_state3 <= WRITE;
-                  wr_rdy3 <= `ASSERT_H;
-                  rd_rdy3 <= `DEASSERT_H;
-                end else if (rd_en3 == `ASSERT_L)
-                  curr_state3 <= READ;
-                else
-                  curr_state3 <= IDLE;
-              end
+      READ: begin
+        rd_rdy3 <= `ASSERT_H;
+        wr_rdy3 <= `DEASSERT_H;
+
+        if (avl_ready_3 == `ASSERT_H && rd_en3 == `ASSERT_L
+               && wr_en3 == `DEASSERT_L) begin
+          avl_read_req_3 <= `ASSERT_H;
+          avl_addr_3 <= rd_addr3;
+          prev_rd_addr3 <= avl_addr_3;
+        end
+        
+        if (wr_en3 == `ASSERT_L || (rd_en3 == `ASSERT_L &&
+                wr_en3 == `ASSERT_L)) begin
+          curr_state3 <= WRITE;
+          wr_rdy3 <= `ASSERT_H;
+          rd_rdy3 <= `DEASSERT_H;
+        end else if (rd_en3 == `ASSERT_L)
+          curr_state3 <= READ;
+        else
+          curr_state3 <= IDLE;
+      end
               
       default:  curr_state3 <= IDLE;
     endcase
@@ -584,29 +621,29 @@ module ram_int_4p #(parameter DATA_WIDTH = 32, ADDR_WIDTH = 29,
 		.avl_read_req_3             (avl_read_req_3),                                 //                   .read
 		.avl_write_req_3            (avl_write_req_3),                                //                   .write
 		.avl_size_3                 (avl_size_3),                                     //                   .burstcount
-		.mp_cmd_clk_0_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_0.clk
+		.mp_cmd_clk_0_clk           (CLOCK_125_p),                              //       mp_cmd_clk_0.clk
 		.mp_cmd_reset_n_0_reset_n   (~rst_controller_reset_out_reset),                //   mp_cmd_reset_n_0.reset_n
-		.mp_cmd_clk_1_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_1.clk
+		.mp_cmd_clk_1_clk           (CLOCK_125_p),                              //       mp_cmd_clk_1.clk
 		.mp_cmd_reset_n_1_reset_n   (~rst_controller_001_reset_out_reset),            //   mp_cmd_reset_n_1.reset_n
-		.mp_cmd_clk_2_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_2.clk
+		.mp_cmd_clk_2_clk           (CLOCK_125_p),                              //       mp_cmd_clk_2.clk
 		.mp_cmd_reset_n_2_reset_n   (~rst_controller_002_reset_out_reset),            //   mp_cmd_reset_n_2.reset_n
-		.mp_cmd_clk_3_clk           (pll0_pll_clk_clk),                              //       mp_cmd_clk_3.clk
+		.mp_cmd_clk_3_clk           (CLOCK_125_p),                              //       mp_cmd_clk_3.clk
 		.mp_cmd_reset_n_3_reset_n   (~rst_controller_003_reset_out_reset),            //   mp_cmd_reset_n_3.reset_n
-		.mp_rfifo_clk_0_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_0.clk
+		.mp_rfifo_clk_0_clk         (CLOCK_125_p),                              //     mp_rfifo_clk_0.clk
 		.mp_rfifo_reset_n_0_reset_n (~rst_controller_004_reset_out_reset),            // mp_rfifo_reset_n_0.reset_n
-		.mp_wfifo_clk_0_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_0.clk
+		.mp_wfifo_clk_0_clk         (CLOCK_125_p),                              //     mp_wfifo_clk_0.clk
 		.mp_wfifo_reset_n_0_reset_n (~rst_controller_005_reset_out_reset),            // mp_wfifo_reset_n_0.reset_n
-		.mp_rfifo_clk_1_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_1.clk
+		.mp_rfifo_clk_1_clk         (CLOCK_125_p),                              //     mp_rfifo_clk_1.clk
 		.mp_rfifo_reset_n_1_reset_n (~rst_controller_006_reset_out_reset),            // mp_rfifo_reset_n_1.reset_n
-		.mp_wfifo_clk_1_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_1.clk
+		.mp_wfifo_clk_1_clk         (CLOCK_125_p),                              //     mp_wfifo_clk_1.clk
 		.mp_wfifo_reset_n_1_reset_n (~rst_controller_007_reset_out_reset),            // mp_wfifo_reset_n_1.reset_n
-		.mp_rfifo_clk_2_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_2.clk
+		.mp_rfifo_clk_2_clk         (CLOCK_125_p),                              //     mp_rfifo_clk_2.clk
 		.mp_rfifo_reset_n_2_reset_n (~rst_controller_008_reset_out_reset),            // mp_rfifo_reset_n_2.reset_n
-		.mp_wfifo_clk_2_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_2.clk
+		.mp_wfifo_clk_2_clk         (CLOCK_125_p),                              //     mp_wfifo_clk_2.clk
 		.mp_wfifo_reset_n_2_reset_n (~rst_controller_009_reset_out_reset),            // mp_wfifo_reset_n_2.reset_n
-		.mp_rfifo_clk_3_clk         (pll0_pll_clk_clk),                              //     mp_rfifo_clk_3.clk
+		.mp_rfifo_clk_3_clk         (CLOCK_125_p),                              //     mp_rfifo_clk_3.clk
 		.mp_rfifo_reset_n_3_reset_n (~rst_controller_010_reset_out_reset),            // mp_rfifo_reset_n_3.reset_n
-		.mp_wfifo_clk_3_clk         (pll0_pll_clk_clk),                              //     mp_wfifo_clk_3.clk
+		.mp_wfifo_clk_3_clk         (CLOCK_125_p),                              //     mp_wfifo_clk_3.clk
 		.mp_wfifo_reset_n_3_reset_n (~rst_controller_011_reset_out_reset),            // mp_wfifo_reset_n_3.reset_n
 		.local_init_done            (local_init_done),                                //             status.local_init_done
 		.local_cal_success          (local_cal_success),                              //                   .local_cal_success
