@@ -1,0 +1,22 @@
+{
+	"system" : {
+		"platform" : "windows64",
+		"os_name" : "Windows 7",
+		"os_version" : "6.2"
+	},
+	"error" : {
+		"executable" : "quartus_sta",
+		"comment" : "none",
+		"error_message" : "Access Violation at 0X00007FFE30747344",
+		"source_file" : "unknown",
+		"line" : "0",
+		"stack_trace" : "\t0x7ffe30747343: DB_HDB + 0x47343 (?get_value@HDB_ENUM_OPTION@@QEBA?AW4ACF_ENUM_VALUE_ENUM@@XZ + 0x3)\n\t0x7ffe2693498e: TSM_STA + 0x2c498e (?sta_rebuild_and_preprocess_tdb@@YA_NPEAVCMP_FACADE@@PEAVCDB_ATOM_NETLIST@@PEAV?$vector@IV?$MEM_STL_ALLOCATOR@I@@@std@@_N333@Z + 0x8a7e)\n\t0x7ffe2693385d: TSM_STA + 0x2c385d (?sta_rebuild_and_preprocess_tdb@@YA_NPEAVCMP_FACADE@@PEAVCDB_ATOM_NETLIST@@PEAV?$vector@IV?$MEM_STL_ALLOCATOR@I@@@std@@_N333@Z + 0x794d)\n\t0x7ffe268b2ab8: TSM_STA + 0x242ab8 (??4STA_NET_DELAY_MGR@@QEAAAEAV0@AEBV0@@Z + 0x21f8)\n\t0x7ffe2693502b: TSM_STA + 0x2c502b (?sta_rebuild_and_preprocess_tdb@@YA_NPEAVCMP_FACADE@@PEAVCDB_ATOM_NETLIST@@PEAV?$vector@IV?$MEM_STL_ALLOCATOR@I@@@std@@_N333@Z + 0x911b)\n\t 0x557f61e2: tcl86 + 0x161e2 (TclNRRunCallbacks + 0x62)\n\t 0x557f7a65: tcl86 + 0x17a65 (TclEvalEx + 0xa65)\n\t 0x557f8257: tcl86 + 0x18257 (Tcl_Eval + 0x37)\n\t0x7ffe3b9314cf: ccl_atcl + 0x214cf (?type@ATCL_OBJ@@KAPEAUTcl_ObjType@@XZ + 0x3cf)\n\t 0x557f61e2: tcl86 + 0x161e2 (TclNRRunCallbacks + 0x62)\n\t 0x557f7a65: tcl86 + 0x17a65 (TclEvalEx + 0xa65)\n\t 0x55886f8b: tcl86 + 0xa6f8b (Tcl_FSEvalFileEx + 0x22b)\n\t 0x55885646: tcl86 + 0xa5646 (Tcl_EvalFile + 0x36)\n\t0x7ffe30b23962: comp_qexe + 0x13962 (?qexe_evaluate_tcl_command@@YA_NPEBD@Z + 0x582)\n\t0x7ffe30b22adc: comp_qexe + 0x12adc (?qexe_apply_ini_vars@@YAXXZ + 0x29ec)\n\t0x7ffe30b27496: comp_qexe + 0x17496 (?qexe_process_cmdline_arguments@@YA_NPEAVQEXE_CMDLINE@@HPEAPEBD@Z + 0x23a6)\n\t0x7ffe30b28381: comp_qexe + 0x18381 (?qexe_standard_main@@YAHPEAVQEXE_FRAMEWORK@@PEAPEBUQEXE_OPTION_DEFINITION@@HPEAPEBD@Z + 0xc1)\n\t0x7ff7960d045e: quartus_sta + 0x1045e\n\t0x7ffe3c79cad8: CCL_MSG + 0xcad8 (?msg_initialize_out_of_memory_handler@@YAXXZ + 0x378)\n\t0x7ffe3c79e20c: CCL_MSG + 0xe20c (?msg_set_stack_size@@YAXH@Z + 0x7c)\n\t0x7ffe3c8a5aa0: ccl_mem + 0x5aa0 (?mem_gen_get_project_output_directory@@YAPEBDXZ + 0x64)\n\t0x7ffe3c79c721: CCL_MSG + 0xc721 (?msg_exe_main@@YAHHPEAPEBDP6AHH0@Z@Z + 0xa1)\n\t0x7ff7960d0b72: quartus_sta + 0x10b72\n\t0x7ffe4b1c13d1: KERNEL32 + 0x13d1 (BaseThreadInitThunk + 0x21)\n\t0x7ffe4db3e953: ntdll + 0x6e953 (RtlUserThreadStart + 0x33)\n",
+		"subsystem" : "unknown"
+	},
+	"quartus" : {
+		"quartus_bits" : "64",
+		"version" : "14.1.0",
+		"build" : "186",
+		"edition" : "Web Edition"
+	}
+}

@@ -1,0 +1,40 @@
+PLL_Name	LPDDR2x32_4p:lpddr2x32_4p_inst|LPDDR2x32_4p_0002:lpddr2x32_4p_inst|LPDDR2x32_4p_pll0:pll0|pll1~FRACTIONAL_PLL
+PLLJITTER	58
+PLLSPEmax	50
+PLLSPEmin	-50
+
+PLL_Name	LPDDR2x32_4p:lpddr2x32_4p_inst|LPDDR2x32_4p_0002:lpddr2x32_4p_inst|LPDDR2x32_4p_pll0:pll0|pll1~PLL_OUTPUT_COUNTER
+PLLJITTER	NA
+PLLSPEmax	NA
+PLLSPEmin	NA
+
+PLL_Name	LPDDR2x32_4p:lpddr2x32_4p_inst|LPDDR2x32_4p_0002:lpddr2x32_4p_inst|LPDDR2x32_4p_pll0:pll0|pll3~PLL_OUTPUT_COUNTER
+PLLJITTER	NA
+PLLSPEmax	NA
+PLLSPEmin	NA
+
+PLL_Name	LPDDR2x32_4p:lpddr2x32_4p_inst|LPDDR2x32_4p_0002:lpddr2x32_4p_inst|LPDDR2x32_4p_pll0:pll0|pll6_phy~PLL_OUTPUT_COUNTER
+PLLJITTER	NA
+PLLSPEmax	NA
+PLLSPEmin	NA
+
+PLL_Name	LPDDR2x32_4p:lpddr2x32_4p_inst|LPDDR2x32_4p_0002:lpddr2x32_4p_inst|LPDDR2x32_4p_pll0:pll0|pll6~PLL_OUTPUT_COUNTER
+PLLJITTER	NA
+PLLSPEmax	NA
+PLLSPEmin	NA
+
+PLL_Name	LPDDR2x32_4p:lpddr2x32_4p_inst|LPDDR2x32_4p_0002:lpddr2x32_4p_inst|LPDDR2x32_4p_pll0:pll0|pll7~PLL_OUTPUT_COUNTER
+PLLJITTER	NA
+PLLSPEmax	NA
+PLLSPEmin	NA
+
+PLL_Name	PLL:pll_inst|PLL_0002:pll_inst|altera_pll:altera_pll_i|general[0].gpll~FRACTIONAL_PLL
+PLLJITTER	58
+PLLSPEmax	50
+PLLSPEmin	-50
+
+PLL_Name	PLL:pll_inst|PLL_0002:pll_inst|altera_pll:altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER
+PLLJITTER	NA
+PLLSPEmax	NA
+PLLSPEmin	NA
+
