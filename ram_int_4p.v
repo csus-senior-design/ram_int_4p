@@ -122,6 +122,7 @@ module ram_int_4p #(
 	
 	reg				avl_burstbegin_0;
 	wire				avl_ready_0;
+	reg				avl_ready_0_fl;
 	reg	[28:0]	avl_addr_0;
 	reg				avl_read_req_0;
 	wire	[3:0]		avl_be_0;
@@ -173,6 +174,7 @@ module ram_int_4p #(
 	wire				local_cal_fail,
 						local_cal_success,
 						local_init_done;
+	reg				local_cal_success_fl;
 	reg				global_reset_n,
 						soft_reset_n;
 	reg	[28:0]	prev_wr_addr0,
@@ -216,6 +218,9 @@ module ram_int_4p #(
 			rd_rdy0 <= `DEASSERT_H;
 		end else
 		
+		local_cal_success_fl <= local_cal_success;
+		avl_ready_0_fl <= avl_ready_0;
+		
 		case (curr_state0)
 			INIT: begin
 				global_reset_n <= `DEASSERT_L;
@@ -225,7 +230,7 @@ module ram_int_4p #(
 					curr_state0 <= INIT;
 				end else
 					curr_state0 <= INIT;
-				if (local_cal_success == `ASSERT_H &&
+				if (local_cal_success_fl == `ASSERT_H &&
 							soft_reset_n == `DEASSERT_L)
 					curr_state0 <= IDLE;
 				else
@@ -239,12 +244,12 @@ module ram_int_4p #(
 				wr_rdy0 <= `DEASSERT_H;
 				rd_rdy0 <= `DEASSERT_H;
 					
-				if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
+				if (avl_ready_0_fl == `ASSERT_H && wr_en0 == `ASSERT_L
 							&& prev_wr_addr0 != wr_addr0
 							&& rd_en0 == `DEASSERT_L) begin
 					curr_state0 <= WRITE;
 					wr_rdy0 <= `ASSERT_H;
-				end else if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L 
+				end else if (avl_ready_0_fl == `ASSERT_H && rd_en0 == `ASSERT_L 
 									&& prev_rd_addr0 != rd_addr0
 									&& wr_en0 == `DEASSERT_L) begin
 					curr_state0 <= READ;
