@@ -54,59 +54,59 @@ Instructions:
 
 module ram_int_4p #(
 	parameter	DATA_WIDTH = 32,
-					ADDR_WIDTH = 29,
-					MEM_DEPTH = 1 << ADDR_WIDTH,
-					BE = 4'h7
+				ADDR_WIDTH = 29,
+				MEM_DEPTH = 1 << ADDR_WIDTH,
+				BE = 4'h7
 )(
-		input       		[ADDR_WIDTH - 1:0]	wr_addr0,
-															rd_addr0,
-															wr_addr1,
-															rd_addr1,
-															wr_addr2,
-															rd_addr2,
-															wr_addr3,
-															rd_addr3,
-		input				[DATA_WIDTH - 1:0]	wr_data0,
-															wr_data1,
-															wr_data2,
-															wr_data3,
-		input												clk_50m,
-															clk,
-															wr_en0,
-															wr_en1,
-															wr_en2,
-															wr_en3,
-															rd_en0,
-															rd_en1,
-															rd_en2,
-															rd_en3,
-															reset,
-		output											rd_data_valid0,
-															rd_data_valid1,
-															rd_data_valid2,
-															rd_data_valid3,
-		output 	reg									wr_rdy0,
-															rd_rdy0,
-															wr_rdy1,
-															rd_rdy1,
-															wr_rdy2,
-															rd_rdy2,
-															wr_rdy3,
-															rd_rdy3,
+		input       [ADDR_WIDTH - 1:0]	wr_addr0,
+										rd_addr0,
+										wr_addr1,
+										rd_addr1,
+										wr_addr2,
+										rd_addr2,
+										wr_addr3,
+										rd_addr3,
+		input		[DATA_WIDTH - 1:0]	wr_data0,
+										wr_data1,
+										wr_data2,
+										wr_data3,
+		input							clk_50m,
+										clk,
+										wr_en0,
+										wr_en1,
+										wr_en2,
+										wr_en3,
+										rd_en0,
+										rd_en1,
+										rd_en2,
+										rd_en3,
+										reset,
+		output							rd_data_valid0,
+										rd_data_valid1,
+										rd_data_valid2,
+										rd_data_valid3,
+		output 	reg						wr_rdy0,
+										rd_rdy0,
+										wr_rdy1,
+										rd_rdy1,
+										wr_rdy2,
+										rd_rdy2,
+										wr_rdy3,
+										rd_rdy3,
 		output	reg	[DATA_WIDTH - 1:0]	rd_data0,
-															rd_data1,
-															rd_data2,
-															rd_data3,
-		output	wire	[9:0]							mem_ca,
-		output	wire	[0:0]							mem_ck,
-		output	wire	[0:0]							mem_ck_n,
-		output	wire	[0:0]							mem_cke,
-		output	wire	[0:0]							mem_cs_n,
-		output	wire	[3:0]							mem_dm,
-		inout		wire	[31:0]						mem_dq,
-		inout		wire	[3:0]							mem_dqs,
-		inout		wire	[3:0]							mem_dqs_n,
-		input		wire									oct_rzqin
+										rd_data1,
+										rd_data2,
+										rd_data3,
+		output	wire	[9:0]			mem_ca,
+		output	wire	[0:0]			mem_ck,
+		output	wire	[0:0]			mem_ck_n,
+		output	wire	[0:0]			mem_cke,
+		output	wire	[0:0]			mem_cs_n,
+		output	wire	[3:0]			mem_dm,
+		inout	wire	[31:0]			mem_dq,
+		inout	wire	[3:0]			mem_dqs,
+		inout	wire	[3:0]			mem_dqs_n,
+		input	wire					oct_rzqin
 	);
 	
 	/* Define the required states. */
@@ -121,73 +121,73 @@ module ram_int_4p #(
 	//wire         pll0_pll_clk_clk;
 	
 	reg				avl_burstbegin_0;
-	wire				avl_ready_0;
+	wire			avl_ready_0;
 	reg				avl_ready_0_fl;
-	reg	[28:0]	avl_addr_0;
+	reg		[28:0]	avl_addr_0;
 	reg				avl_read_req_0;
-	wire	[3:0]		avl_be_0;
-	wire				avl_rdata_valid_0;
+	wire	[3:0]	avl_be_0;
+	wire			avl_rdata_valid_0;
 	reg				avl_write_req_0;
-	reg	[2:0]		avl_size_0;
+	reg		[2:0]	avl_size_0;
 	
 	reg				avl_burstbegin_1;
-	wire				avl_ready_1;
-	reg	[28:0]	avl_addr_1;
+	wire			avl_ready_1;
+	reg		[28:0]	avl_addr_1;
 	reg				avl_read_req_1;
-	wire	[3:0]		avl_be_1;
-	wire				avl_rdata_valid_1;
+	wire	[3:0]	avl_be_1;
+	wire			avl_rdata_valid_1;
 	reg				avl_write_req_1;
-	reg	[2:0]		avl_size_1;
+	reg		[2:0]	avl_size_1;
 	
 	reg				avl_burstbegin_2;
-	wire				avl_ready_2;
-	reg	[28:0]	avl_addr_2;
+	wire			avl_ready_2;
+	reg		[28:0]	avl_addr_2;
 	reg				avl_read_req_2;
-	wire	[3:0]		avl_be_2;
-	wire				avl_rdata_valid_2;
+	wire	[3:0]	avl_be_2;
+	wire			avl_rdata_valid_2;
 	reg				avl_write_req_2;
-	reg	[2:0]		avl_size_2;
+	reg		[2:0]		avl_size_2;
 	
 	reg				avl_burstbegin_3;
-	wire				avl_ready_3;
-	reg	[28:0]	avl_addr_3;
+	wire			avl_ready_3;
+	reg		[28:0]	avl_addr_3;
 	reg				avl_read_req_3;
-	wire	[3:0]		avl_be_3;
-	wire				avl_rdata_valid_3;
+	wire	[3:0]	avl_be_3;
+	wire			avl_rdata_valid_3;
 	reg				avl_write_req_3;
-	reg	[2:0]		avl_size_3;
+	reg		[2:0]	avl_size_3;
 	
-	wire				rst_controller_reset_out_reset;
-	wire				pll0_reset_out_reset;
-	wire				rst_controller_001_reset_out_reset;
-	wire				rst_controller_002_reset_out_reset;
-	wire				rst_controller_003_reset_out_reset;
-	wire				rst_controller_004_reset_out_reset;
-	wire				rst_controller_005_reset_out_reset;
-	wire				rst_controller_006_reset_out_reset;
-	wire				rst_controller_007_reset_out_reset;
-	wire				rst_controller_008_reset_out_reset;
-	wire				rst_controller_009_reset_out_reset;
-	wire				rst_controller_010_reset_out_reset;
-	wire				rst_controller_011_reset_out_reset;
+	wire			rst_controller_reset_out_reset;
+	wire			pll0_reset_out_reset;
+	wire			rst_controller_001_reset_out_reset;
+	wire			rst_controller_002_reset_out_reset;
+	wire			rst_controller_003_reset_out_reset;
+	wire			rst_controller_004_reset_out_reset;
+	wire			rst_controller_005_reset_out_reset;
+	wire			rst_controller_006_reset_out_reset;
+	wire			rst_controller_007_reset_out_reset;
+	wire			rst_controller_008_reset_out_reset;
+	wire			rst_controller_009_reset_out_reset;
+	wire			rst_controller_010_reset_out_reset;
+	wire			rst_controller_011_reset_out_reset;
 	
-	wire				local_cal_fail,
-						local_cal_success,
-						local_init_done;
+	wire			local_cal_fail,
+					local_cal_success,
+					local_init_done;
 	reg				local_cal_success_fl;
 	reg				global_reset_n,
-						soft_reset_n;
-	reg	[28:0]	prev_wr_addr0,
-						prev_rd_addr0,
-						prev_wr_addr1,
-						prev_rd_addr1,
-						prev_wr_addr2,
-						prev_rd_addr2,
-						prev_wr_addr3,
-						prev_rd_addr3;
+					soft_reset_n;
+	reg		[28:0]	prev_wr_addr0,
+					prev_rd_addr0,
+					prev_wr_addr1,
+					prev_rd_addr1,
+					prev_wr_addr2,
+					prev_rd_addr2,
+					prev_wr_addr3,
+					prev_rd_addr3;
 	
 	(* syn_encoding = "safe" *)
-	reg	[1:0]	curr_state0,
+	reg		[1:0]	curr_state0,
 					curr_state1,
 					curr_state2,
 					curr_state3;
@@ -200,6 +200,9 @@ module ram_int_4p #(
 			
 	/* Begin port 0 interface logic */
 	always @(posedge clk) begin
+		local_cal_success_fl <= local_cal_success;
+		avl_ready_0_fl <= avl_ready_0;
+		
 		if (reset == `ASSERT_L) begin
 			global_reset_n <= `ASSERT_L;
 			soft_reset_n <= `ASSERT_L;
@@ -217,9 +220,6 @@ module ram_int_4p #(
 			wr_rdy0 <= `DEASSERT_H;
 			rd_rdy0 <= `DEASSERT_H;
 		end else
-		
-		local_cal_success_fl <= local_cal_success;
-		avl_ready_0_fl <= avl_ready_0;
 		
 		case (curr_state0)
 			INIT: begin
