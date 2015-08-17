@@ -50,7 +50,7 @@ Instructions:
 `define DEASSERT_H 1'b0
 `endif
 
-`timescale 1 ns / 1 ps
+`timescale 1 ns / 1 ns
 
 module ram_int_4p #(
 	parameter	DATA_WIDTH = 32,
@@ -58,41 +58,34 @@ module ram_int_4p #(
 				MEM_DEPTH = 1 << ADDR_WIDTH,
 				BE = 4'h7
 )(
-		input       [ADDR_WIDTH - 1:0]	wr_addr0,
-										rd_addr0,
-										wr_addr1,
-										rd_addr1,
-										wr_addr2,
-										rd_addr2,
-										wr_addr3,
-										rd_addr3,
 		input		[DATA_WIDTH - 1:0]	wr_data0,
 										wr_data1,
 										wr_data2,
 										wr_data3,
 		input							clk_50m,
 										clk,
-										wr_en0,
-										wr_en1,
-										wr_en2,
-										wr_en3,
-										rd_en0,
-										rd_en1,
-										rd_en2,
-										rd_en3,
 										reset,
+										avl_write_req_0,
+										avl_read_req_0,
+										avl_write_req_1,
+										avl_read_req_1,
+										avl_write_req_2,
+										avl_read_req_2,
+										avl_write_req_3,
+										avl_read_req_3,
 		output							rd_data_valid0,
 										rd_data_valid1,
 										rd_data_valid2,
 										rd_data_valid3,
-		output 	reg						wr_rdy0,
-										rd_rdy0,
-										wr_rdy1,
-										rd_rdy1,
-										wr_rdy2,
-										rd_rdy2,
-										wr_rdy3,
-										rd_rdy3,
+		output 	reg						ram_rdy,
+										avl_ready_0_fl,
+										avl_ready_1_fl,
+										avl_ready_2_fl,
+										avl_ready_3_fl,
+		input		[ADDR_WIDTH - 1:0]	avl_addr_0,
+										avl_addr_1,
+										avl_addr_2,
+										avl_addr_3,
 		output	reg	[DATA_WIDTH - 1:0]	rd_data0,
 										rd_data1,
 										rd_data2,
@@ -115,46 +108,39 @@ module ram_int_4p #(
 		IDLE = 2'h1,
 		WRITE = 2'h2,
 		READ = 2'h3;
+		
+	localparam
+		ASSERT_L = 1'b0,
+		DEASSERT_L = 1'b1,
+		ASSERT_H = 1'b1,
+		DEASSERT_H = 1'b0;
 
 	/* Make necessary declarations for the hard memory controller IP. */
-	wire          pll_locked_ddr/*, pll_locked_int*/;
-	//wire         pll0_pll_clk_clk;
+	wire			pll_locked_ddr;
+	reg				local_cal_success_fl;
 	
 	reg				avl_burstbegin_0;
 	wire			avl_ready_0;
-	reg				avl_ready_0_fl;
-	reg		[28:0]	avl_addr_0;
-	reg				avl_read_req_0;
 	wire	[3:0]	avl_be_0;
 	wire			avl_rdata_valid_0;
-	reg				avl_write_req_0;
 	reg		[2:0]	avl_size_0;
 	
 	reg				avl_burstbegin_1;
 	wire			avl_ready_1;
-	reg		[28:0]	avl_addr_1;
-	reg				avl_read_req_1;
 	wire	[3:0]	avl_be_1;
 	wire			avl_rdata_valid_1;
-	reg				avl_write_req_1;
 	reg		[2:0]	avl_size_1;
 	
 	reg				avl_burstbegin_2;
 	wire			avl_ready_2;
-	reg		[28:0]	avl_addr_2;
-	reg				avl_read_req_2;
 	wire	[3:0]	avl_be_2;
 	wire			avl_rdata_valid_2;
-	reg				avl_write_req_2;
-	reg		[2:0]		avl_size_2;
+	reg		[2:0]	avl_size_2;
 	
 	reg				avl_burstbegin_3;
 	wire			avl_ready_3;
-	reg		[28:0]	avl_addr_3;
-	reg				avl_read_req_3;
 	wire	[3:0]	avl_be_3;
 	wire			avl_rdata_valid_3;
-	reg				avl_write_req_3;
 	reg		[2:0]	avl_size_3;
 	
 	wire			rst_controller_reset_out_reset;
@@ -174,23 +160,11 @@ module ram_int_4p #(
 	wire			local_cal_fail,
 					local_cal_success,
 					local_init_done;
-	reg				local_cal_success_fl;
 	reg				global_reset_n,
 					soft_reset_n;
-	reg		[28:0]	prev_wr_addr0,
-					prev_rd_addr0,
-					prev_wr_addr1,
-					prev_rd_addr1,
-					prev_wr_addr2,
-					prev_rd_addr2,
-					prev_wr_addr3,
-					prev_rd_addr3;
-	
+
 	(* syn_encoding = "safe" *)
-	reg		[1:0]	curr_state0,
-					curr_state1,
-					curr_state2,
-					curr_state3;
+	reg		[1:0]	curr_state;
 	
 	/* Assign valid read data signals */
 	assign rd_data_valid0 = avl_rdata_valid_0;
@@ -198,376 +172,44 @@ module ram_int_4p #(
 	assign rd_data_valid2 = avl_rdata_valid_2;
 	assign rd_data_valid3 = avl_rdata_valid_3;
 			
-	/* Begin port 0 interface logic */
 	always @(posedge clk) begin
 		local_cal_success_fl <= local_cal_success;
 		avl_ready_0_fl <= avl_ready_0;
+		avl_ready_1_fl <= avl_ready_1;
+		avl_ready_2_fl <= avl_ready_2;
+		avl_ready_3_fl <= avl_ready_3;
 		
 		if (reset == `ASSERT_L) begin
 			global_reset_n <= `ASSERT_L;
 			soft_reset_n <= `ASSERT_L;
-			curr_state0 <= INIT;
+			curr_state	<= INIT;
 			
 			avl_burstbegin_0 <= `DEASSERT_H;
 			avl_size_0 <= 3'h1;
-			avl_read_req_0 <= `DEASSERT_H;
-			avl_write_req_0 <= `DEASSERT_H;
-			avl_addr_0 <= {ADDR_WIDTH{1'b0}};
-			
-			prev_rd_addr0 <= {ADDR_WIDTH{1'h0}};
-			prev_wr_addr0 <= {ADDR_WIDTH{1'h0}};
-			
-			wr_rdy0 <= `DEASSERT_H;
-			rd_rdy0 <= `DEASSERT_H;
+			ram_rdy <= DEASSERT_H;
 		end else
-		
-		case (curr_state0)
-			INIT: begin
-				global_reset_n <= `DEASSERT_L;
-				if (pll_locked_ddr == `ASSERT_H/* &&
-							pll_locked_int == `ASSERT_H*/) begin
-					soft_reset_n <= `DEASSERT_L;
-					curr_state0 <= INIT;
-				end else
-					curr_state0 <= INIT;
-				if (local_cal_success_fl == `ASSERT_H &&
-							soft_reset_n == `DEASSERT_L)
-					curr_state0 <= IDLE;
-				else
-					curr_state0 <= INIT;
-			end
-						
-			IDLE: begin
-				avl_write_req_0 <= `DEASSERT_H;
-				avl_read_req_0 <= `DEASSERT_H;
-				
-				wr_rdy0 <= `DEASSERT_H;
-				rd_rdy0 <= `DEASSERT_H;
-					
-				if (avl_ready_0_fl == `ASSERT_H && wr_en0 == `ASSERT_L
-							&& prev_wr_addr0 != wr_addr0
-							&& rd_en0 == `DEASSERT_L) begin
-					curr_state0 <= WRITE;
-					wr_rdy0 <= `ASSERT_H;
-				end else if (avl_ready_0_fl == `ASSERT_H && rd_en0 == `ASSERT_L 
-									&& prev_rd_addr0 != rd_addr0
-									&& wr_en0 == `DEASSERT_L) begin
-					curr_state0 <= READ;
-					rd_rdy0 <= `ASSERT_H;
-				end else
-					curr_state0 <= IDLE;
-			end
-			
-			WRITE: begin
-				wr_rdy0 <= `ASSERT_H;
-				rd_rdy0 <= `DEASSERT_H;
-
-				if (avl_ready_0 == `ASSERT_H && wr_en0 == `ASSERT_L
-							 && rd_en0 == `DEASSERT_L) begin
-					avl_write_req_0 <= `ASSERT_H;
-					avl_addr_0 <= wr_addr0;
-					prev_wr_addr0 <= avl_addr_0;
+			ram_rdy <= DEASSERT_H;
+			case (curr_state)
+				INIT: begin
+					global_reset_n <= `DEASSERT_L;
+					if (pll_locked_ddr == `ASSERT_H) begin
+						soft_reset_n <= `DEASSERT_L;
+						curr_state <= INIT;
+					end else
+						curr_state <= INIT;
+					if (local_cal_success_fl == `ASSERT_H &&
+								soft_reset_n == `DEASSERT_L)
+						curr_state <= IDLE;
+					else
+						curr_state <= INIT;
 				end
-				
-				if (rd_en0 == `ASSERT_L || (rd_en0 == `ASSERT_L &&
-							wr_en0 == `ASSERT_L)) begin
-					curr_state0 <= READ;
-					rd_rdy0 <= `ASSERT_H;
-					wr_rdy0 <= `DEASSERT_H;
-				end else if (wr_en0 == `ASSERT_L)
-					curr_state0 <= WRITE;
-				else
-					curr_state0 <= IDLE;
-			end
-			
-			READ: begin
-				rd_rdy0 <= `ASSERT_H;
-				wr_rdy0 <= `DEASSERT_H;
-
-				if (avl_ready_0 == `ASSERT_H && rd_en0 == `ASSERT_L
-							 && wr_en0 == `DEASSERT_L) begin
-					avl_read_req_0 <= `ASSERT_H;
-					avl_addr_0 <= rd_addr0;
-					prev_rd_addr0 <= avl_addr_0;
-				end
-				
-				if (wr_en0 == `ASSERT_L || (rd_en0 == `ASSERT_L &&
-								wr_en0 == `ASSERT_L)) begin
-					curr_state0 <= WRITE;
-					wr_rdy0 <= `ASSERT_H;
-					rd_rdy0 <= `DEASSERT_H;
-				end else if (rd_en0 == `ASSERT_L)
-					curr_state0 <= READ;
-				else
-					curr_state0 <= IDLE;
-			end
-		endcase
-	end
-	/* End port 0 interface logic */
-	
-	/* Begin port 1 interface logic */
-	always @(posedge clk) begin
-		if (reset == `ASSERT_L) begin
-			curr_state1 <= IDLE;
-			
-			avl_burstbegin_1 <= `DEASSERT_H;
-			avl_size_1 <= 3'h1;
-			avl_read_req_1 <= `DEASSERT_H;
-			avl_write_req_1 <= `DEASSERT_H;
-			
-			prev_rd_addr1 <= {ADDR_WIDTH{1'h0}};
-			prev_wr_addr1 <= {ADDR_WIDTH{1'h0}};
-			
-			wr_rdy1 <= `DEASSERT_H;
-			rd_rdy1 <= `DEASSERT_H;
-		end else
-		
-		case (curr_state1)
-			IDLE: begin
-				avl_write_req_1 <= `DEASSERT_H;
-				avl_read_req_1 <= `DEASSERT_H;
-				
-				wr_rdy1 <= `DEASSERT_H;
-				rd_rdy1 <= `DEASSERT_H;
-					
-				if (avl_ready_1 == `ASSERT_H && wr_en1 == `ASSERT_L
-							&& prev_wr_addr1 != wr_addr1
-							&& rd_en1 == `DEASSERT_L) begin
-					curr_state1 <= WRITE;
-					wr_rdy1 <= `ASSERT_H;
-				end else if (avl_ready_1 == `ASSERT_H && rd_en1 == `ASSERT_L 
-									&& prev_rd_addr1 != rd_addr1
-									&& wr_en1 == `DEASSERT_L) begin
-					curr_state1 <= READ;
-					rd_rdy1 <= `ASSERT_H;
-				end else
-					curr_state1 <= IDLE;
-			end
-			
-			WRITE: begin
-				wr_rdy1 <= `ASSERT_H;
-				rd_rdy1 <= `DEASSERT_H;
-
-				if (avl_ready_1 == `ASSERT_H && wr_en1 == `ASSERT_L
-							 && rd_en1 == `DEASSERT_L) begin
-					avl_write_req_1 <= `ASSERT_H;
-					avl_addr_1 <= wr_addr1;
-					prev_wr_addr1 <= avl_addr_1;
-				end
-				
-				if (rd_en1 == `ASSERT_L || (rd_en1 == `ASSERT_L &&
-							wr_en1 == `ASSERT_L)) begin
-					curr_state1 <= READ;
-					rd_rdy1 <= `ASSERT_H;
-					wr_rdy1 <= `DEASSERT_H;
-				end else if (wr_en1 == `ASSERT_L)
-					curr_state1 <= WRITE;
-				else
-					curr_state1 <= IDLE;
-			end
-			
-			READ: begin
-				rd_rdy1 <= `ASSERT_H;
-				wr_rdy1 <= `DEASSERT_H;
-
-				if (avl_ready_1 == `ASSERT_H && rd_en1 == `ASSERT_L
-							 && wr_en1 == `DEASSERT_L) begin
-					avl_read_req_1 <= `ASSERT_H;
-					avl_addr_1 <= rd_addr1;
-					prev_rd_addr1 <= avl_addr_1;
-				end
-				
-				if (wr_en1 == `ASSERT_L || (rd_en1 == `ASSERT_L &&
-								wr_en1 == `ASSERT_L)) begin
-					curr_state1 <= WRITE;
-					wr_rdy1 <= `ASSERT_H;
-					rd_rdy1 <= `DEASSERT_H;
-				end else if (rd_en1 == `ASSERT_L)
-					curr_state1 <= READ;
-				else
-					curr_state1 <= IDLE;
-			end
 							
-			default:  curr_state1 <= IDLE;
-		endcase
+				IDLE: begin
+					curr_state <= IDLE;
+					ram_rdy <= ASSERT_H;
+				end
+			endcase
 	end
-	/* End port 1 interface logic */
-	
-	/* Begin port 2 interface logic */
-	always @(posedge clk) begin
-		if (reset == `ASSERT_L) begin
-			curr_state2 <= IDLE;
-			
-			avl_burstbegin_2 <= `DEASSERT_H;
-			avl_size_2 <= 3'h1;
-			avl_read_req_2 <= `DEASSERT_H;
-			avl_write_req_2 <= `DEASSERT_H;
-			
-			prev_rd_addr2 <= {ADDR_WIDTH{1'h0}};
-			prev_wr_addr2 <= {ADDR_WIDTH{1'h0}};
-			
-			wr_rdy2 <= `DEASSERT_H;
-			rd_rdy2 <= `DEASSERT_H;
-		end else
-		
-		case (curr_state2)
-			IDLE: begin
-				avl_write_req_2 <= `DEASSERT_H;
-				avl_read_req_2 <= `DEASSERT_H;
-				
-				wr_rdy2 <= `DEASSERT_H;
-				rd_rdy2 <= `DEASSERT_H;
-					
-				if (avl_ready_2 == `ASSERT_H && wr_en2 == `ASSERT_L
-							&& prev_wr_addr2 != wr_addr2
-							&& rd_en2 == `DEASSERT_L) begin
-					curr_state2 <= WRITE;
-					wr_rdy2 <= `ASSERT_H;
-				end else if (avl_ready_2 == `ASSERT_H && rd_en2 == `ASSERT_L 
-									&& prev_rd_addr2 != rd_addr2
-									&& wr_en2 == `DEASSERT_L) begin
-					curr_state2 <= READ;
-					rd_rdy2 <= `ASSERT_H;
-				end else
-					curr_state2 <= IDLE;
-			end
-			
-			WRITE: begin
-				wr_rdy2 <= `ASSERT_H;
-				rd_rdy2 <= `DEASSERT_H;
-
-				if (avl_ready_2 == `ASSERT_H && wr_en2 == `ASSERT_L
-							 && rd_en2 == `DEASSERT_L) begin
-					avl_write_req_2 <= `ASSERT_H;
-					avl_addr_2 <= wr_addr2;
-					prev_wr_addr2 <= avl_addr_2;
-				end
-				
-				if (rd_en2 == `ASSERT_L || (rd_en2 == `ASSERT_L &&
-							wr_en2 == `ASSERT_L)) begin
-					curr_state2 <= READ;
-					rd_rdy2 <= `ASSERT_H;
-					wr_rdy2 <= `DEASSERT_H;
-				end else if (wr_en2 == `ASSERT_L)
-					curr_state2 <= WRITE;
-				else
-					curr_state2 <= IDLE;
-			end
-			
-			READ: begin
-				rd_rdy2 <= `ASSERT_H;
-				wr_rdy2 <= `DEASSERT_H;
-
-				if (avl_ready_2 == `ASSERT_H && rd_en2 == `ASSERT_L
-							 && wr_en2 == `DEASSERT_L) begin
-					avl_read_req_2 <= `ASSERT_H;
-					avl_addr_2 <= rd_addr2;
-					prev_rd_addr2 <= avl_addr_2;
-				end
-				
-				if (wr_en2 == `ASSERT_L || (rd_en2 == `ASSERT_L &&
-								wr_en2 == `ASSERT_L)) begin
-					curr_state2 <= WRITE;
-					wr_rdy2 <= `ASSERT_H;
-					rd_rdy2 <= `DEASSERT_H;
-				end else if (rd_en2 == `ASSERT_L)
-					curr_state2 <= READ;
-				else
-					curr_state2 <= IDLE;
-			end
-							
-			default:  curr_state2 <= IDLE;
-		endcase
-	end
-	/* End port 2 interface logic */
-	
-	/* Begin port 3 interface logic */
-	always @(posedge clk) begin
-		if (reset == `ASSERT_L) begin
-			curr_state3 <= IDLE;
-			
-			avl_burstbegin_3 <= `DEASSERT_H;
-			avl_size_3 <= 3'h1;
-			avl_read_req_3 <= `DEASSERT_H;
-			avl_write_req_3 <= `DEASSERT_H;
-			
-			prev_rd_addr3 <= {ADDR_WIDTH{1'h0}};
-			prev_wr_addr3 <= {ADDR_WIDTH{1'h0}};
-			
-			wr_rdy3 <= `DEASSERT_H;
-			rd_rdy3 <= `DEASSERT_H;
-		end else
-		
-		case (curr_state3)
-			IDLE: begin
-				avl_write_req_3 <= `DEASSERT_H;
-				avl_read_req_3 <= `DEASSERT_H;
-				
-				wr_rdy3 <= `DEASSERT_H;
-				rd_rdy3 <= `DEASSERT_H;
-					
-				if (avl_ready_3 == `ASSERT_H && wr_en3 == `ASSERT_L
-							&& prev_wr_addr3 != wr_addr3
-							&& rd_en3 == `DEASSERT_L) begin
-					curr_state3 <= WRITE;
-					wr_rdy3 <= `ASSERT_H;
-				end else if (avl_ready_3 == `ASSERT_H && rd_en3 == `ASSERT_L 
-									&& prev_rd_addr3 != rd_addr3
-									&& wr_en3 == `DEASSERT_L) begin
-					curr_state3 <= READ;
-					rd_rdy3 <= `ASSERT_H;
-				end else
-					curr_state3 <= IDLE;
-			end
-			
-			WRITE: begin
-				wr_rdy3 <= `ASSERT_H;
-				rd_rdy3 <= `DEASSERT_H;
-
-				if (avl_ready_3 == `ASSERT_H && wr_en3 == `ASSERT_L
-							 && rd_en3 == `DEASSERT_L) begin
-					avl_write_req_3 <= `ASSERT_H;
-					avl_addr_3 <= wr_addr3;
-					prev_wr_addr3 <= avl_addr_3;
-				end
-				
-				if (rd_en3 == `ASSERT_L || (rd_en3 == `ASSERT_L &&
-							wr_en3 == `ASSERT_L)) begin
-					curr_state3 <= READ;
-					rd_rdy3 <= `ASSERT_H;
-					wr_rdy3 <= `DEASSERT_H;
-				end else if (wr_en3 == `ASSERT_L)
-					curr_state3 <= WRITE;
-				else
-					curr_state3 <= IDLE;
-			end
-			
-			READ: begin
-				rd_rdy3 <= `ASSERT_H;
-				wr_rdy3 <= `DEASSERT_H;
-
-				if (avl_ready_3 == `ASSERT_H && rd_en3 == `ASSERT_L
-							 && wr_en3 == `DEASSERT_L) begin
-					avl_read_req_3 <= `ASSERT_H;
-					avl_addr_3 <= rd_addr3;
-					prev_rd_addr3 <= avl_addr_3;
-				end
-				
-				if (wr_en3 == `ASSERT_L || (rd_en3 == `ASSERT_L &&
-								wr_en3 == `ASSERT_L)) begin
-					curr_state3 <= WRITE;
-					wr_rdy3 <= `ASSERT_H;
-					rd_rdy3 <= `DEASSERT_H;
-				end else if (rd_en3 == `ASSERT_L)
-					curr_state3 <= READ;
-				else
-					curr_state3 <= IDLE;
-			end
-							
-			default:  curr_state3 <= IDLE;
-		endcase
-	end
-	/* End port 3 interface logic */
 	
 	assign avl_be_0 = BE;
 	assign avl_be_1 = BE;
@@ -708,7 +350,7 @@ module ram_int_4p #(
 	) rst_controller (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                               //       clk.clk
+		.clk            (clk),                               //       clk.clk
 		.reset_out      (rst_controller_reset_out_reset), // reset_out.reset
 		.reset_req      (),                               // (terminated)
 		.reset_req_in0  (1'b0),                           // (terminated)
@@ -770,7 +412,7 @@ module ram_int_4p #(
 	) rst_controller_001 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_001_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -832,7 +474,7 @@ module ram_int_4p #(
 	) rst_controller_002 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_002_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -894,7 +536,7 @@ module ram_int_4p #(
 	) rst_controller_003 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_003_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -956,7 +598,7 @@ module ram_int_4p #(
 	) rst_controller_004 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_004_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1018,7 +660,7 @@ module ram_int_4p #(
 	) rst_controller_005 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_005_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1080,7 +722,7 @@ module ram_int_4p #(
 	) rst_controller_006 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_006_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1142,7 +784,7 @@ module ram_int_4p #(
 	) rst_controller_007 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_007_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1204,7 +846,7 @@ module ram_int_4p #(
 	) rst_controller_008 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_008_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1266,7 +908,7 @@ module ram_int_4p #(
 	) rst_controller_009 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_009_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1328,7 +970,7 @@ module ram_int_4p #(
 	) rst_controller_010 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_010_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1390,7 +1032,7 @@ module ram_int_4p #(
 	) rst_controller_011 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (),                                   //       clk.clk
+		.clk            (clk),                                   //       clk.clk
 		.reset_out      (rst_controller_011_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
