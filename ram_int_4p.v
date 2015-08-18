@@ -41,15 +41,6 @@ Instructions:
 	frame buffer module to this module.
 */
 
-`ifndef ASSERT_L
-`define ASSERT_L 1'b0
-`define DEASSERT_L 1'b1
-`endif
-`ifndef ASSERT_H
-`define ASSERT_H 1'b1
-`define DEASSERT_H 1'b0
-`endif
-
 `timescale 1 ns / 1 ns
 
 module ram_int_4p #(
@@ -104,10 +95,8 @@ module ram_int_4p #(
 	
 	/* Define the required states. */
 	localparam
-		INIT = 2'h0,
-		IDLE = 2'h1,
-		WRITE = 2'h2,
-		READ = 2'h3;
+		INIT = 1'h0,
+		IDLE = 1'h1;
 		
 	localparam
 		ASSERT_L = 1'b0,
@@ -179,26 +168,36 @@ module ram_int_4p #(
 		avl_ready_2_fl <= avl_ready_2;
 		avl_ready_3_fl <= avl_ready_3;
 		
-		if (reset == `ASSERT_L) begin
-			global_reset_n <= `ASSERT_L;
-			soft_reset_n <= `ASSERT_L;
+		if (~reset) begin
+			global_reset_n <= ASSERT_L;
+			soft_reset_n <= ASSERT_L;
 			curr_state	<= INIT;
 			
-			avl_burstbegin_0 <= `DEASSERT_H;
+			avl_burstbegin_0 <= DEASSERT_H;
 			avl_size_0 <= 3'h1;
+			
+			avl_burstbegin_1 <= DEASSERT_H;
+			avl_size_1 <= 3'h1;
+			
+			avl_burstbegin_2 <= DEASSERT_H;
+			avl_size_2 <= 3'h1;
+			
+			avl_burstbegin_3 <= DEASSERT_H;
+			avl_size_3 <= 3'h1;
+			
 			ram_rdy <= DEASSERT_H;
-		end else
+		end else begin
 			ram_rdy <= DEASSERT_H;
 			case (curr_state)
 				INIT: begin
-					global_reset_n <= `DEASSERT_L;
-					if (pll_locked_ddr == `ASSERT_H) begin
-						soft_reset_n <= `DEASSERT_L;
+					global_reset_n <= DEASSERT_L;
+					if (pll_locked_ddr == ASSERT_H) begin
+						soft_reset_n <= DEASSERT_L;
 						curr_state <= INIT;
 					end else
 						curr_state <= INIT;
-					if (local_cal_success_fl == `ASSERT_H &&
-								soft_reset_n == `DEASSERT_L)
+					if (local_cal_success_fl == ASSERT_H &&
+								soft_reset_n == DEASSERT_L)
 						curr_state <= IDLE;
 					else
 						curr_state <= INIT;
@@ -209,6 +208,7 @@ module ram_int_4p #(
 					ram_rdy <= ASSERT_H;
 				end
 			endcase
+		end
 	end
 	
 	assign avl_be_0 = BE;
@@ -350,7 +350,7 @@ module ram_int_4p #(
 	) rst_controller (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                               //       clk.clk
+		.clk            (),                               //       clk.clk
 		.reset_out      (rst_controller_reset_out_reset), // reset_out.reset
 		.reset_req      (),                               // (terminated)
 		.reset_req_in0  (1'b0),                           // (terminated)
@@ -412,7 +412,7 @@ module ram_int_4p #(
 	) rst_controller_001 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_001_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -474,7 +474,7 @@ module ram_int_4p #(
 	) rst_controller_002 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_002_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -536,7 +536,7 @@ module ram_int_4p #(
 	) rst_controller_003 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_003_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -598,7 +598,7 @@ module ram_int_4p #(
 	) rst_controller_004 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_004_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -660,7 +660,7 @@ module ram_int_4p #(
 	) rst_controller_005 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_005_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -722,7 +722,7 @@ module ram_int_4p #(
 	) rst_controller_006 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_006_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -784,7 +784,7 @@ module ram_int_4p #(
 	) rst_controller_007 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_007_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -846,7 +846,7 @@ module ram_int_4p #(
 	) rst_controller_008 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_008_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -908,7 +908,7 @@ module ram_int_4p #(
 	) rst_controller_009 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_009_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -970,7 +970,7 @@ module ram_int_4p #(
 	) rst_controller_010 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_010_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
@@ -1032,7 +1032,7 @@ module ram_int_4p #(
 	) rst_controller_011 (
 		.reset_in0      (~global_reset_n),          // reset_in0.reset
 		.reset_in1      (~soft_reset_n),                // reset_in1.reset
-		.clk            (clk),                                   //       clk.clk
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_011_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
