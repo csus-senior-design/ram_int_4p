@@ -68,7 +68,7 @@ module ram_int_4p #(
 										rd_data_valid1,
 										rd_data_valid2,
 										rd_data_valid3,
-		output 	reg						ram_rdy,
+		output 	reg						ram_rdy = DEASSERT_H,
 										avl_ready_0_fl,
 										avl_ready_1_fl,
 										avl_ready_2_fl,
@@ -153,7 +153,7 @@ module ram_int_4p #(
 					soft_reset_n;
 
 	(* syn_encoding = "safe" *)
-	reg		[1:0]	curr_state;
+	reg		[1:0]	curr_state = INIT;
 	
 	/* Assign valid read data signals */
 	assign rd_data_valid0 = avl_rdata_valid_0;
