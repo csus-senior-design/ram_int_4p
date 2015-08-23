@@ -49,10 +49,10 @@ module ram_int_4p #(
 				MEM_DEPTH = 1 << ADDR_WIDTH,
 				BE = 4'h7
 )(
-		input		[DATA_WIDTH - 1:0]	wr_data0,
-										wr_data1,
-										wr_data2,
-										wr_data3,
+		input		[DATA_WIDTH - 1:0]	wr_data_0,
+										wr_data_1,
+										wr_data_2,
+										wr_data_3,
 		input							clk_50m,
 										clk,
 										reset,
@@ -64,10 +64,10 @@ module ram_int_4p #(
 										avl_read_req_2,
 										avl_write_req_3,
 										avl_read_req_3,
-		output							rd_data_valid0,
-										rd_data_valid1,
-										rd_data_valid2,
-										rd_data_valid3,
+		output							rd_data_valid_0,
+										rd_data_valid_1,
+										rd_data_valid_2,
+										rd_data_valid_3,
 		output 	reg						ram_rdy = DEASSERT_H,
 										avl_ready_0_fl,
 										avl_ready_1_fl,
@@ -77,10 +77,10 @@ module ram_int_4p #(
 										avl_addr_1,
 										avl_addr_2,
 										avl_addr_3,
-		output	reg	[DATA_WIDTH - 1:0]	rd_data0,
-										rd_data1,
-										rd_data2,
-										rd_data3,
+		output	reg	[DATA_WIDTH - 1:0]	rd_data_0,
+										rd_data_1,
+										rd_data_2,
+										rd_data_3,
 		output	wire	[9:0]			mem_ca,
 		output	wire	[0:0]			mem_ck,
 		output	wire	[0:0]			mem_ck_n,
@@ -156,10 +156,10 @@ module ram_int_4p #(
 	reg		[1:0]	curr_state = INIT;
 	
 	/* Assign valid read data signals */
-	assign rd_data_valid0 = avl_rdata_valid_0;
-	assign rd_data_valid1 = avl_rdata_valid_1;
-	assign rd_data_valid2 = avl_rdata_valid_2;
-	assign rd_data_valid3 = avl_rdata_valid_3;
+	assign rd_data_valid_0 = avl_rdata_valid_0;
+	assign rd_data_valid_1 = avl_rdata_valid_1;
+	assign rd_data_valid_2 = avl_rdata_valid_2;
+	assign rd_data_valid_3 = avl_rdata_valid_3;
 			
 	always @(posedge clk) begin
 		local_cal_success_fl <= local_cal_success;
@@ -238,8 +238,8 @@ module ram_int_4p #(
 		.avl_burstbegin_0           (avl_burstbegin_0),                               //                   .beginbursttransfer
 		.avl_addr_0                 (avl_addr_0),                                     //                   .address
 		.avl_rdata_valid_0          (avl_rdata_valid_0),                              //                   .readdatavalid
-		.avl_rdata_0                (rd_data0),                                       //                   .readdata
-		.avl_wdata_0                (wr_data0),                                       //                   .writedata
+		.avl_rdata_0                (rd_data_0),                                       //                   .readdata
+		.avl_wdata_0                (wr_data_0),                                       //                   .writedata
 		.avl_be_0                   (avl_be_0),                                       //                   .byteenable
 		.avl_read_req_0             (avl_read_req_0),                                 //                   .read
 		.avl_write_req_0            (avl_write_req_0),                                //                   .write
@@ -248,8 +248,8 @@ module ram_int_4p #(
 		.avl_burstbegin_1           (avl_burstbegin_1),                               //                   .beginbursttransfer
 		.avl_addr_1                 (avl_addr_1),                                     //                   .address
 		.avl_rdata_valid_1          (avl_rdata_valid_1),                              //                   .readdatavalid
-		.avl_rdata_1                (rd_data1),                                       //                   .readdata
-		.avl_wdata_1                (wr_data1),                                       //                   .writedata
+		.avl_rdata_1                (rd_data_1),                                       //                   .readdata
+		.avl_wdata_1                (wr_data_1),                                       //                   .writedata
 		.avl_be_1                   (avl_be_1),                                       //                   .byteenable
 		.avl_read_req_1             (avl_read_req_1),                                 //                   .read
 		.avl_write_req_1            (avl_write_req_1),                                //                   .write
@@ -258,8 +258,8 @@ module ram_int_4p #(
 		.avl_burstbegin_2           (avl_burstbegin_2),                               //                   .beginbursttransfer
 		.avl_addr_2                 (avl_addr_2),                                     //                   .address
 		.avl_rdata_valid_2          (avl_rdata_valid_2),                              //                   .readdatavalid
-		.avl_rdata_2                (rd_data2),                                       //                   .readdata
-		.avl_wdata_2                (wr_data2),                                       //                   .writedata
+		.avl_rdata_2                (rd_data_2),                                       //                   .readdata
+		.avl_wdata_2                (wr_data_2),                                       //                   .writedata
 		.avl_be_2                   (avl_be_2),                                       //                   .byteenable
 		.avl_read_req_2             (avl_read_req_2),                                 //                   .read
 		.avl_write_req_2            (avl_write_req_2),                                //                   .write
@@ -268,8 +268,8 @@ module ram_int_4p #(
 		.avl_burstbegin_3           (avl_burstbegin_3),                               //                   .beginbursttransfer
 		.avl_addr_3                 (avl_addr_3),                                     //                   .address
 		.avl_rdata_valid_3          (avl_rdata_valid_3),                              //                   .readdatavalid
-		.avl_rdata_3                (rd_data3),                                       //                   .readdata
-		.avl_wdata_3                (wr_data3),                                       //                   .writedata
+		.avl_rdata_3                (rd_data_3),                                       //                   .readdata
+		.avl_wdata_3                (wr_data_3),                                       //                   .writedata
 		.avl_be_3                   (avl_be_3),                                       //                   .byteenable
 		.avl_read_req_3             (avl_read_req_3),                                 //                   .read
 		.avl_write_req_3            (avl_write_req_3),                                //                   .write
