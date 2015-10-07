@@ -69,7 +69,7 @@ module ram_int_4p #(
 										rd_data_valid_2,
 										rd_data_valid_3,
 		output 	reg						ram_rdy = DEASSERT_H,
-										avl_ready_0_fl,
+		output							avl_ready_0_fl,
 										avl_ready_1_fl,
 										avl_ready_2_fl,
 										avl_ready_3_fl,
@@ -160,13 +160,18 @@ module ram_int_4p #(
 	assign rd_data_valid_1 = avl_rdata_valid_1;
 	assign rd_data_valid_2 = avl_rdata_valid_2;
 	assign rd_data_valid_3 = avl_rdata_valid_3;
+	
+	assign avl_ready_0_fl = avl_ready_0;
+	assign avl_ready_1_fl = avl_ready_1;
+	assign avl_ready_2_fl = avl_ready_2;
+	assign avl_ready_3_fl = avl_ready_3;
 			
 	always @(posedge clk) begin
 		local_cal_success_fl <= local_cal_success;
-		avl_ready_0_fl <= avl_ready_0;
+		/*avl_ready_0_fl <= avl_ready_0;
 		avl_ready_1_fl <= avl_ready_1;
 		avl_ready_2_fl <= avl_ready_2;
-		avl_ready_3_fl <= avl_ready_3;
+		avl_ready_3_fl <= avl_ready_3;*/
 		
 		if (~reset) begin
 			global_reset_n <= ASSERT_L;
